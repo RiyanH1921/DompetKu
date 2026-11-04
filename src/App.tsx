@@ -122,6 +122,7 @@ const MainApp: React.FC = () => {
 
         {categoryFormState.isOpen && (
           <CategoryFormModal
+            key={categoryFormState.editingCategory ? categoryFormState.editingCategory.id : `new-${categoryFormState.type}`}
             initialType={categoryFormState.type}
             editingCategory={categoryFormState.editingCategory}
             onClose={() =>

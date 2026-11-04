@@ -27,6 +27,19 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   );
   const [errorMsg, setErrorMsg] = useState<string>('');
 
+  React.useEffect(() => {
+    if (editingCategory) {
+      setName(editingCategory.name);
+      setType(editingCategory.type);
+      setColor(editingCategory.color);
+    } else {
+      setName('');
+      setType(initialType);
+      setColor(COLOR_PALETTE[0]);
+    }
+    setErrorMsg('');
+  }, [editingCategory, initialType]);
+
   const initialLetter = getCategoryInitial(name || 'K');
   const inUse = editingCategory ? isCategoryInUse(editingCategory.id) : false;
 

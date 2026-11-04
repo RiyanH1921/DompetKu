@@ -32,17 +32,23 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     return categories.filter((cat) => cat.type === type);
   }, [categories, type]);
 
-  // Set default category whenever type changes or categories update
+  // Set default category or auto-select newly added category
+  const prevCountRef = React.useRef(categories.length);
   React.useEffect(() => {
-    if (availableCategories.length > 0) {
-      // Keep existing if valid, else select first
+    if (categories.length > prevCountRef.current) {
+      const newest = categories[0];
+      if (newest && newest.type === type) {
+        setCategoryId(newest.id);
+      }
+    } else if (availableCategories.length > 0) {
       if (!availableCategories.some((c) => c.id === categoryId)) {
         setCategoryId(availableCategories[0].id);
       }
     } else {
       setCategoryId('');
     }
-  }, [availableCategories, type]);
+    prevCountRef.current = categories.length;
+  }, [availableCategories, categories, type, categoryId]);
 
   const numericAmount = useMemo(() => {
     const cleaned = amountInput.replace(/[^0-9]/g, '');

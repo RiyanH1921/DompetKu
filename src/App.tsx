@@ -3,15 +3,17 @@ import { WalletProvider, useWallet } from './context/WalletContext';
 import { TabType, BottomNav } from './components/layout/BottomNav';
 import { HomeScreen } from './components/home/HomeScreen';
 import { HistoryScreen } from './components/history/HistoryScreen';
+import { InvestmentScreen } from './components/investment/InvestmentScreen';
 import { ChartScreen } from './components/charts/ChartScreen';
 import { SettingsScreen } from './components/settings/SettingsScreen';
 import { TransactionForm } from './components/transactions/TransactionForm';
 import { EditTransactionModal } from './components/transactions/EditTransactionModal';
+import { InvestmentFormModal } from './components/investment/InvestmentFormModal';
 import { CategoryManager } from './components/categories/CategoryManager';
 import { CategoryFormModal } from './components/categories/CategoryFormModal';
 import { ExportModal } from './components/export/ExportModal';
 import { PinLockModal } from './components/common/PinLockModal';
-import { Transaction, TransactionType, Category } from './types';
+import { Transaction, TransactionType, Category, InvestmentAsset } from './types';
 
 const MainApp: React.FC = () => {
   const { settings } = useWallet();
@@ -28,6 +30,13 @@ const MainApp: React.FC = () => {
   });
 
   const [selectedTxForEdit, setSelectedTxForEdit] = useState<Transaction | null>(null);
+  const [investmentFormState, setInvestmentFormState] = useState<{
+    isOpen: boolean;
+    editingAsset?: InvestmentAsset | null;
+  }>({
+    isOpen: false,
+    editingAsset: null,
+  });
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState<boolean>(false);
   const [categoryFormState, setCategoryFormState] = useState<{
     isOpen: boolean;
@@ -62,6 +71,17 @@ const MainApp: React.FC = () => {
           {activeTab === 'riwayat' && (
             <HistoryScreen
               onSelectTransaction={(tx) => setSelectedTxForEdit(tx)}
+            />
+          )}
+
+          {activeTab === 'investasi' && (
+            <InvestmentScreen
+              onOpenCreateAsset={() =>
+                setInvestmentFormState({ isOpen: true, editingAsset: null })
+              }
+              onOpenEditAsset={(asset) =>
+                setInvestmentFormState({ isOpen: true, editingAsset: asset })
+              }
             />
           )}
 
@@ -101,6 +121,15 @@ const MainApp: React.FC = () => {
           <EditTransactionModal
             transaction={selectedTxForEdit}
             onClose={() => setSelectedTxForEdit(null)}
+          />
+        )}
+
+        {investmentFormState.isOpen && (
+          <InvestmentFormModal
+            editingAsset={investmentFormState.editingAsset}
+            onClose={() =>
+              setInvestmentFormState({ isOpen: false, editingAsset: null })
+            }
           />
         )}
 

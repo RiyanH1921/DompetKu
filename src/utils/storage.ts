@@ -1,4 +1,4 @@
-import { Wallet, Category, Transaction, AppSettings } from '../types';
+import { Wallet, Category, Transaction, AppSettings, InvestmentAsset } from '../types';
 import { CLEAN_WALLET, DEFAULT_CATEGORIES, EMPTY_TRANSACTIONS, INITIAL_SETTINGS } from './seedData';
 
 const STORAGE_KEYS = {
@@ -6,6 +6,7 @@ const STORAGE_KEYS = {
   CATEGORIES: 'dompetku_categories',
   TRANSACTIONS: 'dompetku_transactions',
   SETTINGS: 'dompetku_settings',
+  INVESTMENTS: 'dompetku_investments',
   INITIALIZED: 'dompetku_initialized_v2',
 };
 
@@ -49,6 +50,19 @@ export const storage = {
     localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
   },
 
+  getInvestments(): InvestmentAsset[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.INVESTMENTS);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveInvestments(investments: InvestmentAsset[]): void {
+    localStorage.setItem(STORAGE_KEYS.INVESTMENTS, JSON.stringify(investments));
+  },
+
   getSettings(): AppSettings {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.SETTINGS);
@@ -65,11 +79,12 @@ export const storage = {
   // Export full JSON backup
   createBackupData(): string {
     const backup = {
-      version: '1.0',
+      version: '1.1',
       timestamp: new Date().toISOString(),
       wallet: this.getWallet(),
       categories: this.getCategories(),
       transactions: this.getTransactions(),
+      investments: this.getInvestments(),
       settings: this.getSettings(),
     };
     return JSON.stringify(backup, null, 2);
@@ -83,6 +98,9 @@ export const storage = {
         this.saveWallet(parsed.wallet);
         this.saveCategories(parsed.categories);
         this.saveTransactions(parsed.transactions);
+        if (Array.isArray(parsed.investments)) {
+          this.saveInvestments(parsed.investments);
+        }
         if (parsed.settings) {
           this.saveSettings(parsed.settings);
         }
@@ -99,6 +117,7 @@ export const storage = {
   resetToZero(): void {
     this.saveWallet(CLEAN_WALLET);
     this.saveTransactions([]);
+    this.saveInvestments([]);
     this.saveCategories(DEFAULT_CATEGORIES);
     localStorage.removeItem(STORAGE_KEYS.INITIALIZED);
   }

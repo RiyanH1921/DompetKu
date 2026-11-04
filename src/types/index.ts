@@ -12,7 +12,7 @@ export interface Category {
   name: string;
   type: TransactionType;
   icon?: string;
-  color: string; // Hex color for the circle badge, e.g. '#A73C2C'
+  color: string;
   is_default: boolean;
 }
 
@@ -21,8 +21,8 @@ export interface Transaction {
   wallet_id: string;
   category_id: string;
   type: TransactionType;
-  amount: number; // Positive integer IDR
-  date: string; // ISO string or YYYY-MM-DD / YYYY-MM-DDTHH:mm
+  amount: number;
+  date: string;
   note?: string;
   created_at: string;
   updated_at: string;
@@ -40,3 +40,19 @@ export interface AppSettings {
   pinCode?: string;
 }
 
+export type InvestmentCategory = 'EMAS' | 'KRIPTO';
+
+export interface InvestmentAsset {
+  id: string;
+  name: string;
+  category: InvestmentCategory;
+  invested_amount: number; // Total modal pembelian (Rp)
+  current_value: number;   // Nilai aset saat ini (Rp)
+  weight_grams?: number;   // Khusus emas: jumlah gram
+  buy_price_per_gram?: number; // Khusus emas: harga beli per gram
+  current_price_per_gram?: number; // Khusus emas: harga pasar per gram
+  platform?: string;       // Indodax, Tokocrypto, Brankas, Pegadaian, dll.
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}

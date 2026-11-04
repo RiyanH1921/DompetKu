@@ -1,29 +1,46 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { Wallet, Category, Transaction, AppSettings } from '../types';
+import { Wallet, Category, Transaction, AppSettings, InvestmentAsset } from '../types';
 import { storage } from '../utils/storage';
 
 interface WalletContextType {
   wallet: Wallet;
   categories: Category[];
   transactions: Transaction[];
+  investments: InvestmentAsset[];
   settings: AppSettings;
   categoriesMap: Map<string, Category>;
 
-  // Calculated values
+  // Calculated values for Cash
   currentBalance: number;
   totalIncome: number;
   totalExpense: number;
 
-  // Actions
+  // Calculated values for Investments
+  totalInvested: number;
+  totalCurrentValue: number;
+  totalProfitLoss: number;
+  totalReturnPercentage: number;
+  goldTotalValue: number;
+  cryptoTotalValue: number;
+
+  // Actions - Transactions
   addTransaction: (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => void;
   updateTransaction: (id: string, data: Partial<Omit<Transaction, 'id' | 'created_at'>>) => void;
   deleteTransaction: (id: string) => void;
 
+  // Actions - Categories
   addCategory: (data: Omit<Category, 'id'>) => Category;
   updateCategory: (id: string, data: Partial<Omit<Category, 'id'>>) => void;
   deleteCategory: (id: string) => { success: boolean; message?: string };
   isCategoryInUse: (id: string) => boolean;
 
+  // Actions - Investments
+  addInvestment: (data: Omit<InvestmentAsset, 'id' | 'created_at' | 'updated_at'>) => InvestmentAsset;
+  updateInvestment: (id: string, data: Partial<Omit<InvestmentAsset, 'id' | 'created_at'>>) => void;
+  updateInvestmentValue: (id: string, newValue: number) => void;
+  deleteInvestment: (id: string) => void;
+
+  // System actions
   updateInitialBalance: (amount: number) => void;
   updateSettings: (newSettings: Partial<AppSettings>) => void;
   resetData: () => void;
@@ -37,6 +54,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [wallet, setWallet] = useState<Wallet>(() => storage.getWallet());
   const [categories, setCategories] = useState<Category[]>(() => storage.getCategories());
   const [transactions, setTransactions] = useState<Transaction[]>(() => storage.getTransactions());
+  const [investments, setInvestments] = useState<InvestmentAsset[]>(() => storage.getInvestments());
   const [settings, setSettings] = useState<AppSettings>(() => storage.getSettings());
 
   // Save changes to storage
@@ -51,6 +69,10 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     storage.saveTransactions(transactions);
   }, [transactions]);
+
+  useEffect(() => {
+    storage.saveInvestments(investments);
+  }, [investments]);
 
   useEffect(() => {
     storage.saveSettings(settings);
@@ -87,6 +109,43 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return wallet.initial_balance + totalIncome - totalExpense;
   }, [wallet.initial_balance, totalIncome, totalExpense]);
 
+  // Dynamic investment calculations
+  const {
+    totalInvested,
+    totalCurrentValue,
+    totalProfitLoss,
+    totalReturnPercentage,
+    goldTotalValue,
+    cryptoTotalValue,
+  } = useMemo(() => {
+    let invested = 0;
+    let currentVal = 0;
+    let goldVal = 0;
+    let cryptoVal = 0;
+
+    investments.forEach((asset) => {
+      invested += asset.invested_amount;
+      currentVal += asset.current_value;
+      if (asset.category === 'EMAS') {
+        goldVal += asset.current_value;
+      } else {
+        cryptoVal += asset.current_value;
+      }
+    });
+
+    const profitLoss = currentVal - invested;
+    const returnPct = invested > 0 ? (profitLoss / invested) * 100 : 0;
+
+    return {
+      totalInvested: invested,
+      totalCurrentValue: currentVal,
+      totalProfitLoss: profitLoss,
+      totalReturnPercentage: returnPct,
+      goldTotalValue: goldVal,
+      cryptoTotalValue: cryptoVal,
+    };
+  }, [investments]);
+
   // Transactions management
   const addTransaction = (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => {
     const now = new Date().toISOString();
@@ -96,7 +155,6 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       created_at: now,
       updated_at: now,
     };
-    // Add to beginning of array so newest transactions are first
     setTransactions((prev) => [newTx, ...prev]);
   };
 
@@ -121,7 +179,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ...data,
       id: `cat-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
     };
-    setCategories((prev) => [...prev, newCat]);
+    setCategories((prev) => [newCat, ...prev]);
     return newCat;
   };
 
@@ -142,6 +200,49 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return { success: true };
   };
 
+  // Investments management
+  const addInvestment = (data: Omit<InvestmentAsset, 'id' | 'created_at' | 'updated_at'>): InvestmentAsset => {
+    const now = new Date().toISOString();
+    const newAsset: InvestmentAsset = {
+      ...data,
+      id: `inv-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      created_at: now,
+      updated_at: now,
+    };
+    setInvestments((prev) => [newAsset, ...prev]);
+    return newAsset;
+  };
+
+  const updateInvestment = (id: string, data: Partial<Omit<InvestmentAsset, 'id' | 'created_at'>>) => {
+    const now = new Date().toISOString();
+    setInvestments((prev) =>
+      prev.map((asset) => (asset.id === id ? { ...asset, ...data, updated_at: now } : asset))
+    );
+  };
+
+  const updateInvestmentValue = (id: string, newValue: number) => {
+    const now = new Date().toISOString();
+    setInvestments((prev) =>
+      prev.map((asset) => {
+        if (asset.id !== id) return asset;
+        const updated: InvestmentAsset = {
+          ...asset,
+          current_value: Math.max(0, Math.round(newValue)),
+          updated_at: now,
+        };
+        // If gold with weight_grams, also update current_price_per_gram
+        if (asset.category === 'EMAS' && asset.weight_grams && asset.weight_grams > 0) {
+          updated.current_price_per_gram = Math.round(newValue / asset.weight_grams);
+        }
+        return updated;
+      })
+    );
+  };
+
+  const deleteInvestment = (id: string) => {
+    setInvestments((prev) => prev.filter((asset) => asset.id !== id));
+  };
+
   // Wallet balance management
   const updateInitialBalance = (amount: number) => {
     setWallet((prev) => ({ ...prev, initial_balance: Math.max(0, Math.round(amount)) }));
@@ -156,6 +257,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setWallet(storage.getWallet());
     setCategories(storage.getCategories());
     setTransactions([]);
+    setInvestments([]);
     setSettings(storage.getSettings());
   };
 
@@ -164,6 +266,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setWallet(storage.getWallet());
     setCategories(storage.getCategories());
     setTransactions([]);
+    setInvestments([]);
   };
 
   const restoreData = (jsonString: string): boolean => {
@@ -172,6 +275,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setWallet(storage.getWallet());
       setCategories(storage.getCategories());
       setTransactions(storage.getTransactions());
+      setInvestments(storage.getInvestments());
       setSettings(storage.getSettings());
     }
     return ok;
@@ -183,11 +287,18 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         wallet,
         categories,
         transactions,
+        investments,
         settings,
         categoriesMap,
         currentBalance,
         totalIncome,
         totalExpense,
+        totalInvested,
+        totalCurrentValue,
+        totalProfitLoss,
+        totalReturnPercentage,
+        goldTotalValue,
+        cryptoTotalValue,
         addTransaction,
         updateTransaction,
         deleteTransaction,
@@ -195,6 +306,10 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         updateCategory,
         deleteCategory,
         isCategoryInUse,
+        addInvestment,
+        updateInvestment,
+        updateInvestmentValue,
+        deleteInvestment,
         updateInitialBalance,
         updateSettings,
         resetData,

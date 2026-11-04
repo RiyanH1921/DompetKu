@@ -115,8 +115,9 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
-                value={parseInt(amount.replace(/[^0-9]/g, '') || '0', 10).toLocaleString('id-ID')}
-                onChange={(e) => setAmount(e.target.value)}
+                value={amount ? parseInt(amount.replace(/[^0-9]/g, '') || '0', 10).toLocaleString('id-ID') : ''}
+                onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="0"
                 className={`w-48 font-serif text-3xl font-bold bg-transparent outline-none border-b-2 border-transparent focus:border-current text-left ${
                   type === 'EXPENSE' ? 'text-[#A73C2C]' : 'text-[#25724A]'
                 }`}

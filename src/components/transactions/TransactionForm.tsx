@@ -20,7 +20,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   const { categories, currentBalance, addTransaction } = useWallet();
 
   const [type, setType] = useState<TransactionType>(initialType);
-  const [amountInput, setAmountInput] = useState<string>('150000');
+  const [amountInput, setAmountInput] = useState<string>('');
   const [categoryId, setCategoryId] = useState<string>('');
   const [date, setDate] = useState<string>(formatDateForInput(new Date()));
   const [note, setNote] = useState<string>('');
@@ -171,7 +171,6 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
-                pattern="[0-9]*"
                 value={numericAmount > 0 ? numericAmount.toLocaleString('id-ID') : ''}
                 onChange={handleAmountChange}
                 placeholder="0"

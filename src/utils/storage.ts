@@ -1,20 +1,21 @@
 import { Wallet, Category, Transaction, AppSettings } from '../types';
-import { INITIAL_WALLET, INITIAL_CATEGORIES, INITIAL_TRANSACTIONS, INITIAL_SETTINGS } from './seedData';
+import { CLEAN_WALLET, DEFAULT_CATEGORIES, EMPTY_TRANSACTIONS, INITIAL_SETTINGS } from './seedData';
 
 const STORAGE_KEYS = {
   WALLET: 'dompetku_wallet',
   CATEGORIES: 'dompetku_categories',
   TRANSACTIONS: 'dompetku_transactions',
   SETTINGS: 'dompetku_settings',
+  INITIALIZED: 'dompetku_initialized_v2',
 };
 
 export const storage = {
   getWallet(): Wallet {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.WALLET);
-      return data ? JSON.parse(data) : INITIAL_WALLET;
+      return data ? JSON.parse(data) : CLEAN_WALLET;
     } catch {
-      return INITIAL_WALLET;
+      return CLEAN_WALLET;
     }
   },
 
@@ -25,9 +26,9 @@ export const storage = {
   getCategories(): Category[] {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-      return data ? JSON.parse(data) : INITIAL_CATEGORIES;
+      return data ? JSON.parse(data) : DEFAULT_CATEGORIES;
     } catch {
-      return INITIAL_CATEGORIES;
+      return DEFAULT_CATEGORIES;
     }
   },
 
@@ -38,9 +39,9 @@ export const storage = {
   getTransactions(): Transaction[] {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
-      return data ? JSON.parse(data) : INITIAL_TRANSACTIONS;
+      return data ? JSON.parse(data) : EMPTY_TRANSACTIONS;
     } catch {
-      return INITIAL_TRANSACTIONS;
+      return EMPTY_TRANSACTIONS;
     }
   },
 
@@ -94,12 +95,11 @@ export const storage = {
     }
   },
 
-  // Reset to initial seed data
-  resetToDefault(): void {
-    localStorage.removeItem(STORAGE_KEYS.WALLET);
-    localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
-    localStorage.removeItem(STORAGE_KEYS.TRANSACTIONS);
-    localStorage.removeItem(STORAGE_KEYS.SETTINGS);
+  // Complete reset to 0 (Fresh Slate)
+  resetToZero(): void {
+    this.saveWallet(CLEAN_WALLET);
+    this.saveTransactions([]);
+    this.saveCategories(DEFAULT_CATEGORIES);
+    localStorage.removeItem(STORAGE_KEYS.INITIALIZED);
   }
 };
-

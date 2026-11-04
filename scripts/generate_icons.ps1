@@ -96,3 +96,4 @@ foreach ($entry in $densities.GetEnumerator()) {
 
     Write-Host "Generated icons for $($entry.Key) ($($size)x$($size))"
 }
+

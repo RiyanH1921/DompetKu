@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ChevronRight, Download, Upload, Check } from 'lucide-react';
+import { ChevronRight, Download, Upload, Check, RotateCcw } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
 import { formatRupiah } from '../../utils/format';
 
@@ -19,13 +19,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     updateInitialBalance,
     updateSettings,
     resetData,
+    resetToZero,
     restoreData,
   } = useWallet();
 
   const [isEditingBalance, setIsEditingBalance] = useState<boolean>(false);
   const [balanceInput, setBalanceInput] = useState<string>(wallet.initial_balance.toString());
   const [showBackupModal, setShowBackupModal] = useState<boolean>(false);
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
   const [backupStatus, setBackupStatus] = useState<string>('');
+  const [resetSuccessMsg, setResetSuccessMsg] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Category statistics: total and custom
@@ -213,6 +216,23 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               </div>
               <ChevronRight size={18} className="text-[#8E948B]" />
             </button>
+
+            {/* Reset Semua Data ke 0 */}
+            <button
+              onClick={() => setShowResetConfirmModal(true)}
+              className="w-full p-4 flex items-center justify-between text-left hover:bg-[#FDF2F0] dark:hover:bg-[#341C1A] transition-colors group"
+            >
+              <div>
+                <p className="font-semibold text-sm text-[#A73C2C] dark:text-[#FFA49A] flex items-center gap-1.5">
+                  <RotateCcw size={16} />
+                  <span>Reset Data ke 0 (Mulai dari Awal)</span>
+                </p>
+                <p className="text-xs text-[#767A73] dark:text-[#8E948B] mt-0.5">
+                  Hapus seluruh transaksi dan kembalikan saldo ke Rp 0
+                </p>
+              </div>
+              <ChevronRight size={18} className="text-[#A73C2C]" />
+            </button>
           </div>
         </div>
 
@@ -338,6 +358,54 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               Tutup
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Reset to 0 Confirmation Modal */}
+      {showResetConfirmModal && (
+        <div className="fixed inset-0 z-60 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1C221E] rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn">
+            <div className="w-12 h-12 rounded-2xl bg-[#FDF2F0] dark:bg-[#341C1A] text-[#A73C2C] dark:text-[#FFA49A] flex items-center justify-center mb-4 mx-auto">
+              <RotateCcw size={24} />
+            </div>
+
+            <h3 className="font-serif font-bold text-xl text-center text-[#1C201D] dark:text-[#E8F0EA] mb-2">
+              Mulai dari Awal (Reset ke 0)?
+            </h3>
+
+            <p className="text-xs text-center text-[#767A73] dark:text-[#8E948B] mb-6 leading-relaxed">
+              Seluruh riwayat transaksi akan dihapus dan saldo dompet akan kembali menjadi <strong>Rp 0</strong>. Kategori bawaan akan tetap tersedia agar Anda bisa langsung mencatat keuangan pribadi Anda dari nol.
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowResetConfirmModal(false)}
+                className="flex-1 py-3 rounded-xl border border-[#DDD9CD] dark:border-[#2D3630] text-xs font-semibold text-[#555A51] dark:text-[#D1D7CE]"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  resetToZero();
+                  setShowResetConfirmModal(false);
+                  setResetSuccessMsg('Semua data berhasil di-reset ke 0! DompetKu siap digunakan dari awal.');
+                  setTimeout(() => setResetSuccessMsg(''), 4000);
+                }}
+                className="flex-1 py-3 rounded-xl bg-[#A73C2C] hover:bg-[#8F3325] text-white text-xs font-semibold shadow-sm"
+              >
+                Ya, Reset ke 0
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Success Toast */}
+      {resetSuccessMsg && (
+        <div className="fixed bottom-20 left-6 right-6 max-w-sm mx-auto p-4 rounded-2xl bg-[#1B3B2B] text-white text-xs font-medium text-center shadow-2xl animate-fadeIn z-50">
+          {resetSuccessMsg}
         </div>
       )}
     </div>

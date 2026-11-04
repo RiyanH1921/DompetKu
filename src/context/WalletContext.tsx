@@ -27,6 +27,7 @@ interface WalletContextType {
   updateInitialBalance: (amount: number) => void;
   updateSettings: (newSettings: Partial<AppSettings>) => void;
   resetData: () => void;
+  resetToZero: () => void;
   restoreData: (jsonString: string) => boolean;
 }
 
@@ -151,11 +152,18 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const resetData = () => {
-    storage.resetToDefault();
+    storage.resetToZero();
     setWallet(storage.getWallet());
     setCategories(storage.getCategories());
-    setTransactions(storage.getTransactions());
+    setTransactions([]);
     setSettings(storage.getSettings());
+  };
+
+  const resetToZero = () => {
+    storage.resetToZero();
+    setWallet(storage.getWallet());
+    setCategories(storage.getCategories());
+    setTransactions([]);
   };
 
   const restoreData = (jsonString: string): boolean => {
@@ -190,6 +198,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         updateInitialBalance,
         updateSettings,
         resetData,
+        resetToZero,
         restoreData,
       }}
     >

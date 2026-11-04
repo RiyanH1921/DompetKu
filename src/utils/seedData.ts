@@ -155,3 +155,4 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
     updated_at: makeDate(5, 19, 30),
   },
 ];
+

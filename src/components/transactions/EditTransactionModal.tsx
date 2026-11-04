@@ -218,3 +218,4 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     </div>
   );
 };
+

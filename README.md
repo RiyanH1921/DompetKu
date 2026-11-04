@@ -109,3 +109,4 @@ npx cap add android
 npx cap open android
 ```
 Dokumen ini membuka Android Studio dan siap di-build menjadi APK / AAB untuk Google Play Store.
+

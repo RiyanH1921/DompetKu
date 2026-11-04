@@ -39,3 +39,4 @@ export interface AppSettings {
   pinLockEnabled: boolean;
   pinCode?: string;
 }
+

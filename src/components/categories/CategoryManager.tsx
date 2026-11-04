@@ -133,3 +133,4 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
     </div>
   );
 };
+

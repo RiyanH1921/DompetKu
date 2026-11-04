@@ -41,3 +41,4 @@ export const WalletCard: React.FC<WalletCardProps> = ({ balance, income, expense
     </div>
   );
 };
+

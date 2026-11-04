@@ -359,3 +359,4 @@ export const ChartScreen: React.FC<ChartScreenProps> = ({ onOpenExport }) => {
     </div>
   );
 };
+

@@ -1,0 +1,8 @@
+{
+  "appId": "com.dompetku.app",
+  "appName": "DompetKu",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
-import { InvestmentAsset, InvestmentCategory } from '../../types';
+import { InvestmentAsset, InvestmentCategory, MutualFundType } from '../../types';
 import { useWallet } from '../../context/WalletContext';
 import { formatRupiah } from '../../utils/format';
 
@@ -17,6 +17,11 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
 
   const [category, setCategory] = useState<InvestmentCategory>(
     editingAsset ? editingAsset.category : 'EMAS'
+  );
+
+  // Reksadana type
+  const [mutualFundType, setMutualFundType] = useState<MutualFundType>(
+    editingAsset?.mutual_fund_type || 'PASAR_UANG'
   );
 
   // Emas mode: 'GRAM' or 'DIRECT'
@@ -36,12 +41,12 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
     editingAsset?.current_price_per_gram ? editingAsset.current_price_per_gram.toString() : '1450000'
   );
 
-  // Direct amounts for Kripto or direct Emas
+  // Direct amounts for Kripto, Reksadana, or direct Emas
   const [investedAmount, setInvestedAmount] = useState<string>(
     editingAsset ? editingAsset.invested_amount.toString() : '10000000'
   );
   const [currentValue, setCurrentValue] = useState<string>(
-    editingAsset ? editingAsset.current_value.toString() : '13500000'
+    editingAsset ? editingAsset.current_value.toString() : '10800000'
   );
 
   const [platform, setPlatform] = useState<string>(editingAsset?.platform || '');
@@ -74,7 +79,13 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const finalName = name.trim() || (category === 'EMAS' ? 'Emas Antam' : 'Aset Kripto');
+    const finalName =
+      name.trim() ||
+      (category === 'EMAS'
+        ? 'Emas Antam'
+        : category === 'KRIPTO'
+        ? 'Bitcoin (BTC)'
+        : 'Reksadana Pasar Uang');
 
     if (calculatedModal <= 0) {
       setErrorMsg('Modal investasi harus lebih dari 0');
@@ -90,6 +101,7 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
         weight_grams: category === 'EMAS' && goldInputMode === 'GRAM' ? parseFloat(grams) || undefined : undefined,
         buy_price_per_gram: category === 'EMAS' && goldInputMode === 'GRAM' ? parseInt(buyPricePerGram.replace(/[^0-9]/g, '') || '0', 10) : undefined,
         current_price_per_gram: category === 'EMAS' && goldInputMode === 'GRAM' ? parseInt(curPricePerGram.replace(/[^0-9]/g, '') || '0', 10) : undefined,
+        mutual_fund_type: category === 'REKSADANA' ? mutualFundType : undefined,
         platform: platform.trim() || undefined,
         notes: notes.trim() || undefined,
       });
@@ -102,6 +114,7 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
         weight_grams: category === 'EMAS' && goldInputMode === 'GRAM' ? parseFloat(grams) || undefined : undefined,
         buy_price_per_gram: category === 'EMAS' && goldInputMode === 'GRAM' ? parseInt(buyPricePerGram.replace(/[^0-9]/g, '') || '0', 10) : undefined,
         current_price_per_gram: category === 'EMAS' && goldInputMode === 'GRAM' ? parseInt(curPricePerGram.replace(/[^0-9]/g, '') || '0', 10) : undefined,
+        mutual_fund_type: category === 'REKSADANA' ? mutualFundType : undefined,
         platform: platform.trim() || undefined,
         notes: notes.trim() || undefined,
       });
@@ -118,7 +131,30 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
   };
 
   const cryptoShortcuts = ['Bitcoin (BTC)', 'Ethereum (ETH)', 'Solana (SOL)', 'USDT', 'BNB'];
-  const platformShortcuts = ['Indodax', 'Tokocrypto', 'Pintu', 'Binance', 'Hardware Wallet'];
+  const goldShortcuts = ['Emas Antam Logam Mulia', 'Emas UBS', 'Emas Pegadaian', 'Emas Digital'];
+  
+  const mutualFundShortcuts: Record<MutualFundType, string[]> = {
+    PASAR_UANG: ['Sucorinvest Money Market', 'Batavia Dana Kas Maxima', 'Mandiri Investa Pasar Uang', 'Bahana Dana Likuid'],
+    PENDAPATAN_TETAP: ['Sucorinvest Stable Fund', 'Majoris Sukuk Negara', 'ABF IBI Fund', 'Danamas Stabil'],
+    CAMPURAN: ['Schroder Dana Campuran', 'Sucorinvest Anak Pintar', 'Jarvis Balanced Fund'],
+    SAHAM: ['Sucorinvest Equity Fund', 'BNP Paribas Pesona', 'Batavia Dana Saham', 'Schroder Dana Prestasi'],
+    INDEKS: ['BNP Paribas Sri Kehati', 'Avrist Indeks LQ45', 'Kresna IDX30'],
+  };
+
+  const mutualFundTypes: { id: MutualFundType; label: string; icon: string }[] = [
+    { id: 'PASAR_UANG', label: 'Pasar Uang', icon: '💧' },
+    { id: 'PENDAPATAN_TETAP', label: 'Pendapatan Tetap', icon: '🛡️' },
+    { id: 'CAMPURAN', label: 'Campuran', icon: '⚖️' },
+    { id: 'SAHAM', label: 'Saham', icon: '📊' },
+    { id: 'INDEKS', label: 'Indeks', icon: '🌐' },
+  ];
+
+  const platformShortcuts =
+    category === 'REKSADANA'
+      ? ['Bibit', 'Bareksa', 'Pluang', 'Ajaib', 'Makmur', 'Bank BCA', 'Bank Mandiri']
+      : category === 'KRIPTO'
+      ? ['Indodax', 'Tokocrypto', 'Pintu', 'Binance', 'Hardware Wallet']
+      : ['Antam Official', 'Pegadaian', 'Pluang', 'Tamasia', 'Brankas Pribadi'];
 
   return (
     <div className="fixed inset-0 z-[70] bg-[#F6F5EE] dark:bg-[#121614] overflow-y-auto max-w-md mx-auto flex flex-col min-h-screen">
@@ -149,15 +185,17 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
 
       <form onSubmit={handleSubmit} className="flex-1 px-5 pt-3 pb-8 flex flex-col justify-between">
         <div className="space-y-5">
-          {/* Category Switcher: Emas vs Kripto */}
-          <div className="grid grid-cols-2 gap-2 bg-[#E9E7DC] dark:bg-[#1C221E] p-1.5 rounded-2xl">
+          {/* Category Switcher: Emas | Kripto | Reksadana */}
+          <div className="grid grid-cols-3 gap-1.5 bg-[#E9E7DC] dark:bg-[#1C221E] p-1.5 rounded-2xl">
             <button
               type="button"
               onClick={() => {
                 setCategory('EMAS');
-                if (!name || cryptoShortcuts.includes(name)) setName('Emas Antam Fisik');
+                if (!name || name.includes('BTC') || name.includes('Fund') || name.includes('Market')) {
+                  setName('Emas Antam Logam Mulia');
+                }
               }}
-              className={`py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all ${
+              className={`py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 transition-all ${
                 category === 'EMAS'
                   ? 'bg-[#D4A054] text-[#1C201D] shadow-sm'
                   : 'text-[#6F736C] dark:text-[#8E948B]'
@@ -171,9 +209,11 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
               type="button"
               onClick={() => {
                 setCategory('KRIPTO');
-                if (!name || name.includes('Emas')) setName('Bitcoin (BTC)');
+                if (!name || name.includes('Emas') || name.includes('Fund') || name.includes('Market')) {
+                  setName('Bitcoin (BTC)');
+                }
               }}
-              className={`py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all ${
+              className={`py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 transition-all ${
                 category === 'KRIPTO'
                   ? 'bg-[#1B3B2B] text-white shadow-sm'
                   : 'text-[#6F736C] dark:text-[#8E948B]'
@@ -182,22 +222,76 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
               <span>⚡</span>
               <span>Kripto</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setCategory('REKSADANA');
+                if (!name || name.includes('Emas') || name.includes('BTC')) {
+                  setName(mutualFundShortcuts[mutualFundType][0]);
+                }
+              }}
+              className={`py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 transition-all ${
+                category === 'REKSADANA'
+                  ? 'bg-[#155E75] text-white shadow-sm'
+                  : 'text-[#6F736C] dark:text-[#8E948B]'
+              }`}
+            >
+              <span>📈</span>
+              <span>Reksadana</span>
+            </button>
           </div>
+
+          {/* REKSADANA SUBTYPE SELECTOR */}
+          {category === 'REKSADANA' && (
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-[#767A73] dark:text-[#8E948B]">
+                Jenis Reksadana
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                {mutualFundTypes.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => {
+                      setMutualFundType(t.id);
+                      setName(mutualFundShortcuts[t.id][0]);
+                    }}
+                    className={`py-2 px-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+                      mutualFundType === t.id
+                        ? 'bg-[#155E75] text-white border-[#155E75] shadow-xs'
+                        : 'bg-white dark:bg-[#1C221E] text-[#555A51] dark:text-[#D1D7CE] border-[#DDD9CD] dark:border-[#2D3630]'
+                    }`}
+                  >
+                    <span>{t.icon}</span>
+                    <span className="truncate">{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Asset Name */}
           <div>
             <label className="block text-xs font-semibold text-[#767A73] dark:text-[#8E948B] mb-1.5">
-              Nama Aset
+              {category === 'REKSADANA' ? 'Nama Produk Reksadana' : 'Nama Aset'}
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={category === 'EMAS' ? 'Contoh: Emas Antam 10gr / Emas Pegadaian' : 'Contoh: Bitcoin (BTC)'}
+              placeholder={
+                category === 'EMAS'
+                  ? 'Contoh: Emas Antam 10gr'
+                  : category === 'KRIPTO'
+                  ? 'Contoh: Bitcoin (BTC)'
+                  : 'Contoh: Sucorinvest Money Market Fund'
+              }
               className="w-full bg-white dark:bg-[#1C221E] border border-[#DDD9CD] dark:border-[#2D3630] rounded-2xl px-4 py-3 text-sm font-semibold text-[#1C201D] dark:text-[#E8F0EA] outline-none focus:ring-2 focus:ring-[#1B3B2B]/20"
             />
+            {/* Shortcuts */}
             {category === 'KRIPTO' && (
-              <div className="flex gap-1.5 overflow-x-auto py-1 mt-1.5">
+              <div className="flex gap-1.5 overflow-x-auto py-1 mt-1.5 no-scrollbar">
                 {cryptoShortcuts.map((c) => (
                   <button
                     key={c}
@@ -210,10 +304,38 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
                 ))}
               </div>
             )}
+            {category === 'EMAS' && (
+              <div className="flex gap-1.5 overflow-x-auto py-1 mt-1.5 no-scrollbar">
+                {goldShortcuts.map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setName(g)}
+                    className="px-2.5 py-1 rounded-full bg-white dark:bg-[#1C221E] border border-[#DDD9CD] dark:border-[#2D3630] text-[11px] font-medium text-[#555A51] dark:text-[#D1D7CE] whitespace-nowrap"
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+            )}
+            {category === 'REKSADANA' && (
+              <div className="flex gap-1.5 overflow-x-auto py-1 mt-1.5 no-scrollbar">
+                {mutualFundShortcuts[mutualFundType].map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setName(m)}
+                    className="px-2.5 py-1 rounded-full bg-white dark:bg-[#1C221E] border border-[#DDD9CD] dark:border-[#2D3630] text-[11px] font-medium text-[#555A51] dark:text-[#D1D7CE] whitespace-nowrap"
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* EMAS SPECIFIC INPUTS */}
-          {category === 'EMAS' ? (
+          {category === 'EMAS' && (
             <div className="space-y-4">
               {/* Gramasi vs Nominal Toggle */}
               <div className="flex items-center justify-between text-xs font-semibold text-[#767A73] dark:text-[#8E948B]">
@@ -312,12 +434,14 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
                 </div>
               )}
             </div>
-          ) : (
-            /* KRIPTO SPECIFIC INPUTS */
+          )}
+
+          {/* KRIPTO & REKSADANA INPUTS */}
+          {category !== 'EMAS' && (
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-[#767A73] dark:text-[#8E948B] mb-1.5">
-                  Total Modal Pembelian (Rupiah)
+                  {category === 'REKSADANA' ? 'Total Modal Investasi (Rp)' : 'Total Modal Pembelian (Rp)'}
                 </label>
                 <input
                   type="text"
@@ -331,7 +455,7 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-[#767A73] dark:text-[#8E948B] mb-1.5">
-                  Nilai Saldo Terkini di Aplikasi Exchange (Rupiah)
+                  {category === 'REKSADANA' ? 'Nilai Portofolio Terkini (Rp)' : 'Nilai Saldo Terkini di Exchange (Rp)'}
                 </label>
                 <input
                   type="text"
@@ -342,33 +466,44 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
                   className="w-full bg-white dark:bg-[#1C221E] border border-[#DDD9CD] dark:border-[#2D3630] rounded-2xl px-4 py-3 text-sm font-semibold text-[#1C201D] dark:text-[#E8F0EA] outline-none"
                 />
               </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#767A73] dark:text-[#8E948B] mb-1.5">
-                  Tempat Penyimpanan / Exchange (Opsional)
-                </label>
-                <input
-                  type="text"
-                  value={platform}
-                  onChange={(e) => setPlatform(e.target.value)}
-                  placeholder="Contoh: Indodax, Tokocrypto, Pintu, Binance"
-                  className="w-full bg-white dark:bg-[#1C221E] border border-[#DDD9CD] dark:border-[#2D3630] rounded-2xl px-4 py-2.5 text-xs text-[#1C201D] dark:text-[#E8F0EA] outline-none"
-                />
-                <div className="flex gap-1.5 overflow-x-auto py-1 mt-1">
-                  {platformShortcuts.map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => setPlatform(p)}
-                      className="px-2 py-0.5 rounded-full bg-white dark:bg-[#1C221E] border border-[#DDD9CD] text-[10px] text-[#767A73] whitespace-nowrap"
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
+
+          {/* Platform / APERD */}
+          <div>
+            <label className="block text-xs font-semibold text-[#767A73] dark:text-[#8E948B] mb-1.5">
+              {category === 'REKSADANA'
+                ? 'Aplikasi / Agen Penjual (APERD) - Opsional'
+                : category === 'KRIPTO'
+                ? 'Exchange / Dompet Kripto (Opsional)'
+                : 'Tempat Beli / Penyimpanan (Opsional)'}
+            </label>
+            <input
+              type="text"
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              placeholder={
+                category === 'REKSADANA'
+                  ? 'Contoh: Bibit, Bareksa, Pluang'
+                  : category === 'KRIPTO'
+                  ? 'Contoh: Indodax, Tokocrypto, Pintu'
+                  : 'Contoh: Antam Official, Pegadaian'
+              }
+              className="w-full bg-white dark:bg-[#1C221E] border border-[#DDD9CD] dark:border-[#2D3630] rounded-2xl px-4 py-2.5 text-xs text-[#1C201D] dark:text-[#E8F0EA] outline-none"
+            />
+            <div className="flex gap-1.5 overflow-x-auto py-1 mt-1.5 no-scrollbar">
+              {platformShortcuts.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPlatform(p)}
+                  className="px-2.5 py-0.5 rounded-full bg-white dark:bg-[#1C221E] border border-[#DDD9CD] dark:border-[#2D3630] text-[10px] text-[#767A73] dark:text-[#8E948B] whitespace-nowrap"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Catatan */}
           <div>
@@ -379,7 +514,7 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Contoh: Beli saat harga koreksi / Simpan di brankas"
+              placeholder="Contoh: Nabung rutin bulanan / Jangka panjang"
               className="w-full bg-white dark:bg-[#1C221E] border border-[#DDD9CD] dark:border-[#2D3630] rounded-2xl px-4 py-2.5 text-xs text-[#1C201D] dark:text-[#E8F0EA] outline-none"
             />
           </div>
@@ -429,4 +564,3 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
     </div>
   );
 };
-

@@ -40,7 +40,9 @@ export interface AppSettings {
   pinCode?: string;
 }
 
-export type InvestmentCategory = 'EMAS' | 'KRIPTO';
+export type InvestmentCategory = 'EMAS' | 'KRIPTO' | 'REKSADANA';
+
+export type MutualFundType = 'PASAR_UANG' | 'PENDAPATAN_TETAP' | 'CAMPURAN' | 'SAHAM' | 'INDEKS';
 
 export interface InvestmentAsset {
   id: string;
@@ -51,7 +53,8 @@ export interface InvestmentAsset {
   weight_grams?: number;   // Khusus emas: jumlah gram
   buy_price_per_gram?: number; // Khusus emas: harga beli per gram
   current_price_per_gram?: number; // Khusus emas: harga pasar per gram
-  platform?: string;       // Indodax, Tokocrypto, Brankas, Pegadaian, dll.
+  mutual_fund_type?: MutualFundType; // Khusus reksadana: jenis reksadana
+  platform?: string;       // Bibit, Bareksa, Indodax, Tokocrypto, Pegadaian, dll.
   notes?: string;
   created_at: string;
   updated_at: string;

@@ -22,6 +22,7 @@ export const InvestmentScreen: React.FC<InvestmentScreenProps> = ({
     totalReturnPercentage,
     goldTotalValue,
     cryptoTotalValue,
+    mutualFundTotalValue,
     updateInvestmentValue,
   } = useWallet();
 
@@ -38,6 +39,7 @@ export const InvestmentScreen: React.FC<InvestmentScreenProps> = ({
   // Percentages for breakdown bar
   const goldPct = totalCurrentValue > 0 ? Math.round((goldTotalValue / totalCurrentValue) * 100) : 0;
   const cryptoPct = totalCurrentValue > 0 ? Math.round((cryptoTotalValue / totalCurrentValue) * 100) : 0;
+  const mutualFundPct = totalCurrentValue > 0 ? Math.round((mutualFundTotalValue / totalCurrentValue) * 100) : 0;
 
   return (
     <div className="pb-28 pt-4 px-5 max-w-md mx-auto">
@@ -100,23 +102,34 @@ export const InvestmentScreen: React.FC<InvestmentScreenProps> = ({
 
           {/* Asset Allocation Chips */}
           {totalCurrentValue > 0 && (
-            <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-[#D0E2D7]">
-              <span className="flex items-center gap-1">
-                <span>🪙 Emas:</span>
-                <strong className="text-white">{formatRupiah(goldTotalValue)}</strong>
-                <span>({goldPct}%)</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <span>⚡ Kripto:</span>
-                <strong className="text-white">{formatRupiah(cryptoTotalValue)}</strong>
-                <span>({cryptoPct}%)</span>
-              </span>
+            <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#D0E2D7]">
+              {goldTotalValue > 0 && (
+                <span className="flex items-center gap-1">
+                  <span>🪙 Emas:</span>
+                  <strong className="text-white">{formatRupiah(goldTotalValue)}</strong>
+                  <span>({goldPct}%)</span>
+                </span>
+              )}
+              {cryptoTotalValue > 0 && (
+                <span className="flex items-center gap-1">
+                  <span>⚡ Kripto:</span>
+                  <strong className="text-white">{formatRupiah(cryptoTotalValue)}</strong>
+                  <span>({cryptoPct}%)</span>
+                </span>
+              )}
+              {mutualFundTotalValue > 0 && (
+                <span className="flex items-center gap-1">
+                  <span>📈 Reksadana:</span>
+                  <strong className="text-white">{formatRupiah(mutualFundTotalValue)}</strong>
+                  <span>({mutualFundPct}%)</span>
+                </span>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Filter Chips: Semua | 🪙 Emas | ⚡ Kripto */}
+      {/* Filter Chips: Semua | 🪙 Emas | ⚡ Kripto | 📈 Reksadana */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 mb-4">
         <button
           onClick={() => setActiveFilter('ALL')}
@@ -152,16 +165,28 @@ export const InvestmentScreen: React.FC<InvestmentScreenProps> = ({
           <span>⚡</span>
           <span>Kripto ({investments.filter((a) => a.category === 'KRIPTO').length})</span>
         </button>
+
+        <button
+          onClick={() => setActiveFilter('REKSADANA')}
+          className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition-all ${
+            activeFilter === 'REKSADANA'
+              ? 'bg-[#155E75] text-white shadow-sm'
+              : 'bg-white dark:bg-[#1C221E] text-[#6F736C] dark:text-[#8E948B] border border-[#DDD9CD] dark:border-[#2D3630]'
+          }`}
+        >
+          <span>📈</span>
+          <span>Reksadana ({investments.filter((a) => a.category === 'REKSADANA').length})</span>
+        </button>
       </div>
 
       {/* Assets List */}
       {filteredAssets.length === 0 ? (
         <div className="py-16 text-center text-[#767A73] dark:text-[#8E948B] bg-white/40 dark:bg-white/[0.02] rounded-3xl border border-[#DDD9CD]/60 dark:border-white/5 p-6">
           <div className="w-14 h-14 rounded-2xl bg-[#EDECE4] dark:bg-[#252E27] flex items-center justify-center text-2xl mx-auto mb-3">
-            {activeFilter === 'EMAS' ? '🪙' : activeFilter === 'KRIPTO' ? '⚡' : '💼'}
+            {activeFilter === 'EMAS' ? '🪙' : activeFilter === 'KRIPTO' ? '⚡' : activeFilter === 'REKSADANA' ? '📈' : '💼'}
           </div>
           <p className="font-semibold text-sm text-[#1C201D] dark:text-[#E8F0EA]">
-            Belum ada aset {activeFilter === 'EMAS' ? 'emas' : activeFilter === 'KRIPTO' ? 'kripto' : 'investasi'}
+            Belum ada aset {activeFilter === 'EMAS' ? 'emas' : activeFilter === 'KRIPTO' ? 'kripto' : activeFilter === 'REKSADANA' ? 'reksadana' : 'investasi'}
           </p>
           <p className="text-xs mt-1 max-w-xs mx-auto leading-relaxed">
             Mulai catat modal dan nilai terkini untuk memantau keuntungan aset Anda secara offline
@@ -180,6 +205,27 @@ export const InvestmentScreen: React.FC<InvestmentScreenProps> = ({
             const retPct = asset.invested_amount > 0 ? (pnl / asset.invested_amount) * 100 : 0;
             const isProfit = pnl >= 0;
             const isGold = asset.category === 'EMAS';
+            const isCrypto = asset.category === 'KRIPTO';
+            const isMutualFund = asset.category === 'REKSADANA';
+
+            const getMutualFundBadge = (type?: string) => {
+              switch (type) {
+                case 'PASAR_UANG':
+                  return { label: 'Pasar Uang', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' };
+                case 'PENDAPATAN_TETAP':
+                  return { label: 'Pendapatan Tetap', color: 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300' };
+                case 'CAMPURAN':
+                  return { label: 'Campuran', color: 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300' };
+                case 'SAHAM':
+                  return { label: 'Saham', color: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300' };
+                case 'INDEKS':
+                  return { label: 'Indeks', color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-300' };
+                default:
+                  return { label: 'Reksadana', color: 'bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300' };
+              }
+            };
+
+            const mfBadge = isMutualFund ? getMutualFundBadge(asset.mutual_fund_type) : null;
 
             return (
               <div
@@ -192,19 +238,26 @@ export const InvestmentScreen: React.FC<InvestmentScreenProps> = ({
                     <div
                       className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"
                       style={{
-                        backgroundColor: isGold ? '#F9F1E2' : '#EAF3ED',
+                        backgroundColor: isGold ? '#F9F1E2' : isCrypto ? '#EAF3ED' : '#E0F2FE',
                       }}
                     >
-                      {isGold ? '🪙' : '⚡'}
+                      {isGold ? '🪙' : isCrypto ? '⚡' : '📈'}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-sm sm:text-base text-[#1C201D] dark:text-[#E8F0EA]">
-                        {asset.name}
-                      </h4>
-                      <p className="text-xs text-[#767A73] dark:text-[#8E948B]">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="font-semibold text-sm sm:text-base text-[#1C201D] dark:text-[#E8F0EA]">
+                          {asset.name}
+                        </h4>
+                        {mfBadge && (
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${mfBadge.color}`}>
+                            {mfBadge.label}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-[#767A73] dark:text-[#8E948B] mt-0.5">
                         {isGold && asset.weight_grams ? `${asset.weight_grams} gram` : ''}
                         {asset.platform ? (isGold && asset.weight_grams ? ` · ${asset.platform}` : asset.platform) : ''}
-                        {!asset.weight_grams && !asset.platform ? (isGold ? 'Emas' : 'Kripto') : ''}
+                        {!asset.weight_grams && !asset.platform ? (isGold ? 'Emas' : isCrypto ? 'Kripto' : 'Reksadana') : ''}
                       </p>
                     </div>
                   </div>

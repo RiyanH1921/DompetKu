@@ -22,6 +22,7 @@ interface WalletContextType {
   totalReturnPercentage: number;
   goldTotalValue: number;
   cryptoTotalValue: number;
+  mutualFundTotalValue: number;
 
   // Actions - Transactions
   addTransaction: (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => void;
@@ -117,19 +118,23 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     totalReturnPercentage,
     goldTotalValue,
     cryptoTotalValue,
+    mutualFundTotalValue,
   } = useMemo(() => {
     let invested = 0;
     let currentVal = 0;
     let goldVal = 0;
     let cryptoVal = 0;
+    let mutualFundVal = 0;
 
     investments.forEach((asset) => {
       invested += asset.invested_amount;
       currentVal += asset.current_value;
       if (asset.category === 'EMAS') {
         goldVal += asset.current_value;
-      } else {
+      } else if (asset.category === 'KRIPTO') {
         cryptoVal += asset.current_value;
+      } else if (asset.category === 'REKSADANA') {
+        mutualFundVal += asset.current_value;
       }
     });
 
@@ -143,6 +148,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       totalReturnPercentage: returnPct,
       goldTotalValue: goldVal,
       cryptoTotalValue: cryptoVal,
+      mutualFundTotalValue: mutualFundVal,
     };
   }, [investments]);
 
@@ -299,6 +305,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         totalReturnPercentage,
         goldTotalValue,
         cryptoTotalValue,
+        mutualFundTotalValue,
         addTransaction,
         updateTransaction,
         deleteTransaction,

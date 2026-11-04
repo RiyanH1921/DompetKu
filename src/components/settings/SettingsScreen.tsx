@@ -296,7 +296,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
       {/* Backup & Restore Modal */}
       {showBackupModal && (
-        <div className="fixed inset-0 z-60 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1C221E] rounded-3xl p-6 max-w-sm w-full shadow-2xl">
             <h3 className="font-serif font-bold text-xl text-[#1C201D] dark:text-[#E8F0EA] mb-2">
               Backup & Restore Data
@@ -363,7 +363,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
       {/* Reset to 0 Confirmation Modal */}
       {showResetConfirmModal && (
-        <div className="fixed inset-0 z-60 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1C221E] rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn">
             <div className="w-12 h-12 rounded-2xl bg-[#FDF2F0] dark:bg-[#341C1A] text-[#A73C2C] dark:text-[#FFA49A] flex items-center justify-center mb-4 mx-auto">
               <RotateCcw size={24} />

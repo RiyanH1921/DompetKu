@@ -189,7 +189,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
       {/* Delete Confirmation Modal */}
       {showConfirmDelete && (
-        <div className="fixed inset-0 z-60 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1C221E] rounded-3xl p-6 max-w-xs w-full shadow-xl">
             <h3 className="font-serif font-bold text-lg text-[#1C201D] dark:text-[#E8F0EA] mb-2">
               Hapus transaksi?

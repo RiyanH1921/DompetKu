@@ -121,7 +121,7 @@ export const InvestmentFormModal: React.FC<InvestmentFormModalProps> = ({
   const platformShortcuts = ['Indodax', 'Tokocrypto', 'Pintu', 'Binance', 'Hardware Wallet'];
 
   return (
-    <div className="fixed inset-0 z-60 bg-[#F6F5EE] dark:bg-[#121614] overflow-y-auto max-w-md mx-auto flex flex-col min-h-screen">
+    <div className="fixed inset-0 z-[70] bg-[#F6F5EE] dark:bg-[#121614] overflow-y-auto max-w-md mx-auto flex flex-col min-h-screen">
       {/* Top Header */}
       <header className="px-5 pt-5 pb-3 flex items-center justify-between sticky top-0 bg-[#F6F5EE] dark:bg-[#121614] z-10 border-b border-[#E3E1D5]/40 dark:border-white/5">
         <button

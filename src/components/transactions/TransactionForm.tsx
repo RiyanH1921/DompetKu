@@ -184,7 +184,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             </p>
             <div className="relative inline-flex items-center justify-center max-w-full">
               <span
-                className={`font-serif text-3xl sm:text-4xl font-bold mr-1 ${
+                className={`font-display text-3xl sm:text-4xl font-extrabold mr-1 ${
                   type === 'EXPENSE'
                     ? 'text-[#A73C2C] dark:text-[#F6B3A9]'
                     : 'text-[#25724A] dark:text-[#8EE0B0]'
@@ -198,7 +198,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                 value={numericAmount > 0 ? numericAmount.toLocaleString('id-ID') : ''}
                 onChange={handleAmountChange}
                 placeholder="0"
-                className={`w-48 sm:w-56 font-serif text-3xl sm:text-4xl font-bold bg-transparent outline-none border-b-2 border-transparent focus:border-current text-left ${
+                className={`w-48 sm:w-56 font-display text-3xl sm:text-4xl font-extrabold bg-transparent outline-none border-b-2 border-transparent focus:border-current text-left ${
                   type === 'EXPENSE'
                     ? 'text-[#A73C2C] dark:text-[#F6B3A9]'
                     : 'text-[#25724A] dark:text-[#8EE0B0]'

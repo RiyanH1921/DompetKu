@@ -292,3 +292,4 @@ export const TransferModal: React.FC<TransferModalProps> = ({ onClose }) => {
     </div>
   );
 };
+

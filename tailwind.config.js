@@ -33,8 +33,9 @@ export default {
         }
       },
       fontFamily: {
-        serif: ['"Playfair Display"', 'Georgia', 'Cambria', '"Times New Roman"', 'serif'],
         sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['"Outfit"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        serif: ['"Outfit"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'], // Redirect legacy serif classes to modern Outfit
       },
       zIndex: {
         '60': '60',

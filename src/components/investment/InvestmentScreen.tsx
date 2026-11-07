@@ -49,7 +49,7 @@ export const InvestmentScreen: React.FC<InvestmentScreenProps> = ({
           <p className="text-xs text-[#767A73] dark:text-[#8E948B] font-medium">
             Portofolio Aset
           </p>
-          <h1 className="font-serif text-3xl font-bold text-[#1C201D] dark:text-[#E8F0EA]">
+          <h1 className="font-display text-3xl font-extrabold text-[#1C201D] dark:text-[#E8F0EA]">
             Investasi
           </h1>
         </div>
@@ -72,7 +72,7 @@ export const InvestmentScreen: React.FC<InvestmentScreenProps> = ({
             TOTAL NILAI PORTOFOLIO
           </p>
 
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white mt-1.5 mb-3 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-display font-extrabold text-white mt-1.5 mb-3 tracking-tight">
             {formatRupiah(totalCurrentValue)}
           </h2>
 

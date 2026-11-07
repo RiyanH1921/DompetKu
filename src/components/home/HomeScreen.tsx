@@ -39,7 +39,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <p className="text-xs text-[#767A73] dark:text-[#8E948B] font-medium">
             Selamat datang kembali
           </p>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#1C201D] dark:text-[#E8F0EA] tracking-tight">
+          <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-[#1C201D] dark:text-[#E8F0EA] tracking-tight">
             DompetKu
           </h1>
         </div>

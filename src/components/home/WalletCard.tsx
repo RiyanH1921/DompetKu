@@ -134,7 +134,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
             {active.desc}
           </p>
 
-          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-white mt-3 mb-5 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-display font-extrabold text-white mt-3 mb-5 tracking-tight">
             {formatRupiah(active.balance)}
           </h2>
 

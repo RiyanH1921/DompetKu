@@ -116,7 +116,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             </p>
             <div className="relative inline-flex items-center justify-center">
               <span
-                className={`font-serif text-3xl font-bold mr-1 ${
+                className={`font-display text-3xl font-extrabold mr-1 ${
                   type === 'EXPENSE' ? 'text-[#A73C2C]' : 'text-[#25724A]'
                 }`}
               >
@@ -128,7 +128,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 value={amount ? parseInt(amount.replace(/[^0-9]/g, '') || '0', 10).toLocaleString('id-ID') : ''}
                 onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ''))}
                 placeholder="0"
-                className={`w-48 font-serif text-3xl font-bold bg-transparent outline-none border-b-2 border-transparent focus:border-current text-left ${
+                className={`w-48 font-display text-3xl font-extrabold bg-transparent outline-none border-b-2 border-transparent focus:border-current text-left ${
                   type === 'EXPENSE' ? 'text-[#A73C2C]' : 'text-[#25724A]'
                 }`}
               />

@@ -188,38 +188,38 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedIncomeWallet('UMUM')}
-                  className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                  className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                     selectedIncomeWallet === 'UMUM'
                       ? 'bg-[#1B3B2B] text-white shadow-sm ring-2 ring-[#1B3B2B]/20'
                       : 'bg-[#F2EFE9] dark:bg-[#202722] text-[#565A53] dark:text-[#A0A69D] hover:bg-[#EAE6DE]'
                   }`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span className="truncate">🟢 D. Umum</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+                  <span className="truncate">D. Umum</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedIncomeWallet('BIRU')}
-                  className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                  className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                     selectedIncomeWallet === 'BIRU'
                       ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-500/30'
                       : 'bg-[#F2EFE9] dark:bg-[#202722] text-[#565A53] dark:text-[#A0A69D] hover:bg-[#EAE6DE]'
                   }`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-blue-300" />
-                  <span className="truncate">🔵 D. Biru</span>
+                  <span className="w-2 h-2 rounded-full bg-blue-300 flex-shrink-0" />
+                  <span className="truncate">D. Biru</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedIncomeWallet('MERAH')}
-                  className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                  className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                     selectedIncomeWallet === 'MERAH'
                       ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-500/30'
                       : 'bg-[#F2EFE9] dark:bg-[#202722] text-[#565A53] dark:text-[#A0A69D] hover:bg-[#EAE6DE]'
                   }`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-rose-300" />
-                  <span className="truncate">🔴 D. Merah</span>
+                  <span className="w-2 h-2 rounded-full bg-rose-300 flex-shrink-0" />
+                  <span className="truncate">D. Merah</span>
                 </button>
               </div>
               <p className="text-[10px] text-center text-[#767A73] dark:text-[#8E948B]">

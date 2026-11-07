@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, AlertCircle, Plus } from 'lucide-react';
-import { TransactionType } from '../../types';
+import { CategoryType } from '../../types';
 import { useWallet } from '../../context/WalletContext';
 import { formatRupiah, formatDateForInput } from '../../utils/format';
 
 interface TransactionFormProps {
-  initialType?: TransactionType;
+  initialType?: CategoryType;
   onClose: () => void;
   onOpenManageCategories: () => void;
-  onOpenNewCategory: (type: TransactionType) => void;
+  onOpenNewCategory: (type: CategoryType) => void;
 }
 
 export const TransactionForm: React.FC<TransactionFormProps> = ({
@@ -17,15 +17,18 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   onOpenManageCategories,
   onOpenNewCategory,
 }) => {
-  const { categories, currentBalance, addTransaction } = useWallet();
+  const { categories, currentBalance, saldoBiru, saldoUmum, addTransaction } = useWallet();
 
-  const [type, setType] = useState<TransactionType>(initialType);
+  const [type, setType] = useState<CategoryType>(initialType);
   const [amountInput, setAmountInput] = useState<string>('');
   const [categoryId, setCategoryId] = useState<string>('');
   const [date, setDate] = useState<string>(formatDateForInput(new Date()));
   const [note, setNote] = useState<string>('');
   const [showOverbalanceWarning, setShowOverbalanceWarning] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
+
+  // Target wallet balance based on transaction type
+  const targetWalletBalance = type === 'INCOME' ? saldoBiru : saldoUmum;
 
   // Filter categories by selected transaction type
   const availableCategories = useMemo(() => {
@@ -58,13 +61,13 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   // Realtime balance after transaction calculation (FR-12, FR-09)
   const balanceAfterTransaction = useMemo(() => {
     if (type === 'INCOME') {
-      return currentBalance + numericAmount;
+      return targetWalletBalance + numericAmount;
     } else {
-      return currentBalance - numericAmount;
+      return targetWalletBalance - numericAmount;
     }
-  }, [currentBalance, numericAmount, type]);
+  }, [targetWalletBalance, numericAmount, type]);
 
-  const isOverbalance = type === 'EXPENSE' && numericAmount > currentBalance;
+  const isOverbalance = type === 'EXPENSE' && numericAmount > saldoUmum;
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/[^0-9]/g, '');
@@ -97,7 +100,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     txDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
 
     addTransaction({
-      wallet_id: 'wallet-default',
+      wallet_id: type === 'INCOME' ? 'BIRU' : 'UMUM',
       category_id: categoryId,
       type,
       amount: numericAmount,
@@ -137,7 +140,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               }}
               className={`py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 type === 'INCOME'
-                  ? 'bg-[#1B3B2B] text-white shadow-sm'
+                  ? 'bg-[#1E3A8A] text-white shadow-sm'
                   : 'text-[#565A53] dark:text-[#8E948B] hover:text-[#1C201D] dark:hover:text-white'
               }`}
             >
@@ -157,6 +160,21 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             >
               Pengeluaran
             </button>
+          </div>
+
+          {/* 3-Pocket Target Destination Indicator */}
+          <div className="text-center -mt-2">
+            {type === 'INCOME' ? (
+              <span className="inline-flex items-center gap-1.5 text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-3 py-1 rounded-full font-medium border border-blue-200/60 dark:border-blue-800/60">
+                <span className="w-2 h-2 rounded-full bg-blue-600" />
+                <span>Masuk langsung ke <strong>Dompet Biru</strong> (Uang Dingin)</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs text-[#1B3B2B] dark:text-[#8EE0B0] bg-[#EAF3ED] dark:bg-[#162D20] px-3 py-1 rounded-full font-medium border border-[#C5E1CF] dark:border-[#254C38]">
+                <span className="w-2 h-2 rounded-full bg-[#1B3B2B] dark:bg-[#8EE0B0]" />
+                <span>Memotong saldo <strong>Dompet Umum</strong> (Uang Harian)</span>
+              </span>
+            )}
           </div>
 
           {/* Nominal Display & Input */}

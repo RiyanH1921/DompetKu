@@ -16,7 +16,10 @@ export function formatRupiah(amount: number): string {
  * Example: INCOME 6500000 -> "+Rp 6.500.000"
  * Example: EXPENSE 45000 -> "−Rp 45.000"
  */
-export function formatTransactionAmount(amount: number, type: 'INCOME' | 'EXPENSE'): string {
+export function formatTransactionAmount(amount: number, type: 'INCOME' | 'EXPENSE' | 'TRANSFER'): string {
+  if (type === 'TRANSFER') {
+    return formatRupiah(amount);
+  }
   const sign = type === 'INCOME' ? '+' : '−';
   return `${sign}${formatRupiah(amount)}`;
 }

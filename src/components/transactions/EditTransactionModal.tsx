@@ -22,7 +22,8 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   const [note, setNote] = useState<string>(transaction.note || '');
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
 
-  const availableCategories = categories.filter((c) => c.type === type);
+  const isTransfer = transaction.type === 'TRANSFER';
+  const availableCategories = categories.filter((c) => c.type === (type as 'INCOME' | 'EXPENSE'));
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +37,7 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     updateTransaction(transaction.id, {
       type,
       amount: numeric,
-      category_id: categoryId,
+      category_id: isTransfer ? 'cat-transfer' : categoryId,
       date: txDate.toISOString(),
       note: note.trim() || undefined,
     });
@@ -73,31 +74,40 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
       <form onSubmit={handleSave} className="flex-1 px-5 pt-3 pb-8 flex flex-col justify-between">
         <div className="space-y-6">
-          {/* Income vs Expense Tabs */}
-          <div className="grid grid-cols-2 gap-2 bg-[#E9E7DC] dark:bg-[#1C221E] p-1.5 rounded-2xl">
-            <button
-              type="button"
-              onClick={() => setType('INCOME')}
-              className={`py-2.5 rounded-xl text-sm font-medium transition-all ${
-                type === 'INCOME'
-                  ? 'bg-[#1B3B2B] text-white shadow-sm'
-                  : 'text-[#565A53] dark:text-[#8E948B]'
-              }`}
-            >
-              Pendapatan
-            </button>
-            <button
-              type="button"
-              onClick={() => setType('EXPENSE')}
-              className={`py-2.5 rounded-xl text-sm font-medium transition-all ${
-                type === 'EXPENSE'
-                  ? 'bg-[#A73C2C] text-white shadow-sm'
-                  : 'text-[#565A53] dark:text-[#8E948B]'
-              }`}
-            >
-              Pengeluaran
-            </button>
-          </div>
+          {/* Income vs Expense Tabs or Transfer Indicator */}
+          {isTransfer ? (
+            <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-2xl flex items-center justify-between text-xs text-blue-700 dark:text-blue-300">
+              <span className="font-bold flex items-center gap-1.5">
+                <span>⇄</span>
+                <span>Transaksi Pindah Dana Antar Dompet</span>
+              </span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 bg-[#E9E7DC] dark:bg-[#1C221E] p-1.5 rounded-2xl">
+              <button
+                type="button"
+                onClick={() => setType('INCOME')}
+                className={`py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  type === 'INCOME'
+                    ? 'bg-[#1B3B2B] text-white shadow-sm'
+                    : 'text-[#565A53] dark:text-[#8E948B]'
+                }`}
+              >
+                Pendapatan
+              </button>
+              <button
+                type="button"
+                onClick={() => setType('EXPENSE')}
+                className={`py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  type === 'EXPENSE'
+                    ? 'bg-[#A73C2C] text-white shadow-sm'
+                    : 'text-[#565A53] dark:text-[#8E948B]'
+                }`}
+              >
+                Pengeluaran
+              </button>
+            </div>
+          )}
 
           {/* Nominal */}
           <div className="text-center py-4 bg-white/60 dark:bg-white/[0.03] rounded-3xl border border-[#E7E5D9] dark:border-white/5 p-4 shadow-sm">
@@ -125,30 +135,32 @@ export const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             </div>
           </div>
 
-          {/* Kategori */}
-          <div>
-            <label className="block text-xs font-semibold text-[#767A73] dark:text-[#8E948B] mb-2">
-              Kategori
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {availableCategories.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setCategoryId(cat.id)}
-                  className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
-                    categoryId === cat.id
-                      ? type === 'EXPENSE'
-                        ? 'bg-[#A73C2C] text-white shadow-sm'
-                        : 'bg-[#1B3B2B] text-white shadow-sm'
-                      : 'bg-white dark:bg-[#1C221E] text-[#2D312E] dark:text-[#D1D7CE] border border-[#DDD9CD] dark:border-[#2D3630]'
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
+          {/* Kategori (khusus Pendapatan / Pengeluaran) */}
+          {!isTransfer && (
+            <div>
+              <label className="block text-xs font-semibold text-[#767A73] dark:text-[#8E948B] mb-2">
+                Kategori
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {availableCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setCategoryId(cat.id)}
+                    className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
+                      categoryId === cat.id
+                        ? type === 'EXPENSE'
+                          ? 'bg-[#A73C2C] text-white shadow-sm'
+                          : 'bg-[#1B3B2B] text-white shadow-sm'
+                        : 'bg-white dark:bg-[#1C221E] text-[#2D312E] dark:text-[#D1D7CE] border border-[#DDD9CD] dark:border-[#2D3630]'
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Tanggal */}
           <div>

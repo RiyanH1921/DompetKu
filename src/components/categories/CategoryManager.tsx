@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ArrowLeft, Edit3, Plus, Check, X, Palette, Trash2 } from 'lucide-react';
-import { Category, TransactionType } from '../../types';
+import { Category, CategoryType } from '../../types';
 import { useWallet } from '../../context/WalletContext';
 import { getCategoryInitial } from '../../utils/format';
 import { COLOR_PALETTE } from '../../utils/seedData';
 
 interface CategoryManagerProps {
   onClose: () => void;
-  onOpenCreateCategory?: (type: TransactionType) => void;
+  onOpenCreateCategory?: (type: CategoryType) => void;
   onOpenEditCategory?: (category: Category) => void;
 }
 
@@ -17,7 +17,7 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({
   onOpenEditCategory,
 }) => {
   const { categories, transactions, updateCategory, addCategory, deleteCategory } = useWallet();
-  const [activeType, setActiveType] = useState<TransactionType>('EXPENSE');
+  const [activeType, setActiveType] = useState<CategoryType>('EXPENSE');
 
   // Inline rename state
   const [editingId, setEditingId] = useState<string | null>(null);

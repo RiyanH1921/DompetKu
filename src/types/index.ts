@@ -1,4 +1,7 @@
-export type TransactionType = 'INCOME' | 'EXPENSE';
+export type TransactionType = 'INCOME' | 'EXPENSE' | 'TRANSFER';
+export type CategoryType = 'INCOME' | 'EXPENSE';
+
+export type WalletId = 'BIRU' | 'MERAH' | 'UMUM';
 
 export interface Wallet {
   id: string;
@@ -10,7 +13,7 @@ export interface Wallet {
 export interface Category {
   id: string;
   name: string;
-  type: TransactionType;
+  type: CategoryType;
   icon?: string;
   color: string;
   is_default: boolean;
@@ -18,7 +21,8 @@ export interface Category {
 
 export interface Transaction {
   id: string;
-  wallet_id: string;
+  wallet_id: string; // Wallet sumber
+  target_wallet_id?: string; // Wallet tujuan (khusus TRANSFER)
   category_id: string;
   type: TransactionType;
   amount: number;

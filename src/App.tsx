@@ -8,12 +8,13 @@ import { ChartScreen } from './components/charts/ChartScreen';
 import { SettingsScreen } from './components/settings/SettingsScreen';
 import { TransactionForm } from './components/transactions/TransactionForm';
 import { EditTransactionModal } from './components/transactions/EditTransactionModal';
+import { TransferModal } from './components/transactions/TransferModal';
 import { InvestmentFormModal } from './components/investment/InvestmentFormModal';
 import { CategoryManager } from './components/categories/CategoryManager';
 import { CategoryFormModal } from './components/categories/CategoryFormModal';
 import { ExportModal } from './components/export/ExportModal';
 import { PinLockModal } from './components/common/PinLockModal';
-import { Transaction, TransactionType, Category, InvestmentAsset } from './types';
+import { Transaction, CategoryType, Category, InvestmentAsset } from './types';
 
 const MainApp: React.FC = () => {
   const { settings } = useWallet();
@@ -23,13 +24,14 @@ const MainApp: React.FC = () => {
   // Modals state
   const [transactionFormState, setTransactionFormState] = useState<{
     isOpen: boolean;
-    type: TransactionType;
+    type: CategoryType;
   }>({
     isOpen: false,
     type: 'EXPENSE',
   });
 
   const [selectedTxForEdit, setSelectedTxForEdit] = useState<Transaction | null>(null);
+  const [isTransferOpen, setIsTransferOpen] = useState<boolean>(false);
   const [investmentFormState, setInvestmentFormState] = useState<{
     isOpen: boolean;
     editingAsset?: InvestmentAsset | null;
@@ -40,7 +42,7 @@ const MainApp: React.FC = () => {
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState<boolean>(false);
   const [categoryFormState, setCategoryFormState] = useState<{
     isOpen: boolean;
-    type: TransactionType;
+    type: CategoryType;
     editingCategory?: Category | null;
   }>({
     isOpen: false,
@@ -62,6 +64,7 @@ const MainApp: React.FC = () => {
               onOpenCreateTransaction={(type) =>
                 setTransactionFormState({ isOpen: true, type })
               }
+              onOpenTransfer={() => setIsTransferOpen(true)}
               onViewAllTransactions={() => setActiveTab('riwayat')}
               onSelectTransaction={(tx) => setSelectedTxForEdit(tx)}
               onOpenSettings={() => setActiveTab('pengaturan')}
@@ -122,6 +125,10 @@ const MainApp: React.FC = () => {
             transaction={selectedTxForEdit}
             onClose={() => setSelectedTxForEdit(null)}
           />
+        )}
+
+        {isTransferOpen && (
+          <TransferModal onClose={() => setIsTransferOpen(false)} />
         )}
 
         {investmentFormState.isOpen && (

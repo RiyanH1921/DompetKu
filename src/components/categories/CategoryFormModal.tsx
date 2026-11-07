@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Trash2 } from 'lucide-react';
-import { Category, TransactionType } from '../../types';
+import { Category, CategoryType } from '../../types';
 import { useWallet } from '../../context/WalletContext';
 import { COLOR_PALETTE } from '../../utils/seedData';
 import { getCategoryInitial } from '../../utils/format';
 
 interface CategoryFormModalProps {
-  initialType?: TransactionType;
+  initialType?: CategoryType;
   editingCategory?: Category | null;
   onClose: () => void;
 }
@@ -18,7 +18,7 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 }) => {
   const { addCategory, updateCategory, deleteCategory, isCategoryInUse } = useWallet();
 
-  const [type, setType] = useState<TransactionType>(
+  const [type, setType] = useState<CategoryType>(
     editingCategory ? editingCategory.type : initialType
   );
   const [name, setName] = useState<string>(editingCategory ? editingCategory.name : '');

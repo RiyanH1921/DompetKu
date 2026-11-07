@@ -29,6 +29,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
     : getRelativeDateText(transaction.date);
 
   const isIncome = transaction.type === 'INCOME';
+  const isTransfer = transaction.type === 'TRANSFER';
 
   return (
     <div
@@ -42,24 +43,24 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
       }`}
     >
       <div className="flex items-center gap-3.5 min-w-0">
-        {/* Category Initial Avatar */}
+        {/* Category Initial Avatar or Transfer Icon */}
         <div
           className="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-base flex-shrink-0 shadow-sm"
           style={{
-            backgroundColor: `${color}18`, // 10% opacity tint
-            color: color,
+            backgroundColor: isTransfer ? '#3B82F620' : `${color}18`,
+            color: isTransfer ? '#2563EB' : color,
           }}
         >
-          {initial}
+          {isTransfer ? '⇄' : initial}
         </div>
 
         {/* Title and Category info */}
         <div className="min-w-0">
           <p className="font-semibold text-sm sm:text-base text-[#1C201D] dark:text-[#E8F0EA] truncate">
-            {transaction.note || catName}
+            {transaction.note || (isTransfer ? 'Pindah Dana' : catName)}
           </p>
           <p className="text-xs text-[#767A73] dark:text-[#8E948B] mt-0.5 truncate">
-            {catName} · {dateSubtext}
+            {isTransfer ? 'Pindah Antar Dompet' : catName} · {dateSubtext}
           </p>
         </div>
       </div>
@@ -70,6 +71,8 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
           className={`font-semibold text-sm sm:text-base ${
             isIncome
               ? 'text-[#25724A] dark:text-[#52C485]'
+              : isTransfer
+              ? 'text-blue-600 dark:text-blue-400 font-sans'
               : 'text-[#1C201D] dark:text-[#E8F0EA]'
           }`}
         >

@@ -3,10 +3,11 @@ import { useWallet } from '../../context/WalletContext';
 import { WalletCard } from './WalletCard';
 import { ActionButtons } from './ActionButtons';
 import { RecentTransactions } from './RecentTransactions';
-import { Transaction, TransactionType } from '../../types';
+import { Transaction, CategoryType } from '../../types';
 
 interface HomeScreenProps {
-  onOpenCreateTransaction: (type: TransactionType) => void;
+  onOpenCreateTransaction: (type: CategoryType) => void;
+  onOpenTransfer: () => void;
   onViewAllTransactions: () => void;
   onSelectTransaction: (transaction: Transaction) => void;
   onOpenSettings: () => void;
@@ -14,16 +15,26 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenCreateTransaction,
+  onOpenTransfer,
   onViewAllTransactions,
   onSelectTransaction,
   onOpenSettings,
 }) => {
-  const { currentBalance, totalIncome, totalExpense, transactions, categoriesMap } = useWallet();
+  const {
+    currentBalance,
+    saldoBiru,
+    saldoMerah,
+    saldoUmum,
+    totalIncome,
+    totalExpense,
+    transactions,
+    categoriesMap,
+  } = useWallet();
 
   return (
     <div className="pt-4 px-5 max-w-md mx-auto">
-      {/* Top Greeting (Page 1) */}
-      <div className="flex items-center justify-between mb-5">
+      {/* Top Greeting */}
+      <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-xs text-[#767A73] dark:text-[#8E948B] font-medium">
             Selamat datang kembali
@@ -42,16 +53,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </button>
       </div>
 
-      {/* Main Wallet Card */}
+      {/* Main 3-Pocket Wallet Card with Switcher */}
       <WalletCard
-        balance={currentBalance}
+        totalBalance={currentBalance}
+        saldoBiru={saldoBiru}
+        saldoMerah={saldoMerah}
+        saldoUmum={saldoUmum}
         income={totalIncome}
         expense={totalExpense}
+        onOpenTransfer={onOpenTransfer}
       />
 
-      {/* Action Buttons: + Pendapatan, - Pengeluaran */}
+      {/* Action Buttons: + Masuk (Biru), ⇄ Pindah Dana, - Keluar (Umum) */}
       <ActionButtons
         onAddIncome={() => onOpenCreateTransaction('INCOME')}
+        onOpenTransfer={onOpenTransfer}
         onAddExpense={() => onOpenCreateTransaction('EXPENSE')}
       />
 
@@ -65,4 +81,3 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     </div>
   );
 };
-

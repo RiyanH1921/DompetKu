@@ -9,7 +9,7 @@ interface HistoryScreenProps {
   onSelectTransaction: (transaction: Transaction) => void;
 }
 
-type FilterType = 'ALL' | 'INCOME' | 'EXPENSE';
+type FilterType = 'ALL' | 'INCOME' | 'EXPENSE' | 'TRANSFER';
 
 export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectTransaction }) => {
   const { transactions, categoriesMap } = useWallet();
@@ -42,6 +42,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectTransactio
       // Type filter
       if (filterType === 'INCOME' && tx.type !== 'INCOME') return false;
       if (filterType === 'EXPENSE' && tx.type !== 'EXPENSE') return false;
+      if (filterType === 'TRANSFER' && tx.type !== 'TRANSFER') return false;
 
       // Month filter
       if (selectedMonth) {
@@ -145,6 +146,17 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectTransactio
           }`}
         >
           Pengeluaran
+        </button>
+
+        <button
+          onClick={() => setFilterType('TRANSFER')}
+          className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+            filterType === 'TRANSFER'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'bg-white dark:bg-[#1C221E] text-[#6F736C] dark:text-[#9BA098] border border-[#DDD9CD] dark:border-[#2D3630]'
+          }`}
+        >
+          Pindah Dana
         </button>
 
         {/* Month selector dropdown / pill */}

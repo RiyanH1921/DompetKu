@@ -15,6 +15,11 @@ interface WalletContextType {
   totalIncome: number;
   totalExpense: number;
 
+  // 3-Pocket Cash Balances
+  saldoBiru: number;
+  saldoMerah: number;
+  saldoUmum: number;
+
   // Calculated values for Investments
   totalInvested: number;
   totalCurrentValue: number;
@@ -28,6 +33,7 @@ interface WalletContextType {
   addTransaction: (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => void;
   updateTransaction: (id: string, data: Partial<Omit<Transaction, 'id' | 'created_at'>>) => void;
   deleteTransaction: (id: string) => void;
+  transferFunds: (from: 'BIRU' | 'MERAH' | 'UMUM', to: 'BIRU' | 'MERAH' | 'UMUM', amount: number, note?: string) => void;
 
   // Actions - Categories
   addCategory: (data: Omit<Category, 'id'>) => Category;
@@ -92,23 +98,61 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return map;
   }, [categories]);
 
-  // Dynamic balance calculations (BR-01)
-  const { totalIncome, totalExpense } = useMemo(() => {
+  // Dynamic balance calculations for 3-Pocket system
+  const { saldoBiru, saldoMerah, saldoUmum, totalIncome, totalExpense } = useMemo(() => {
     let income = 0;
     let expense = 0;
+    let biru = 0;
+    let merah = 0;
+    let umum = wallet.initial_balance || 0;
+
     transactions.forEach((tx) => {
       if (tx.type === 'INCOME') {
         income += tx.amount;
-      } else {
+        if (tx.wallet_id === 'BIRU' || !tx.wallet_id) {
+          // Pendapatan masuk langsung ke Dompet Biru (Uang Dingin)
+          biru += tx.amount;
+        } else if (tx.wallet_id === 'MERAH') {
+          merah += tx.amount;
+        } else {
+          umum += tx.amount;
+        }
+      } else if (tx.type === 'EXPENSE') {
         expense += tx.amount;
+        if (tx.wallet_id === 'BIRU') {
+          biru -= tx.amount;
+        } else if (tx.wallet_id === 'MERAH') {
+          merah -= tx.amount;
+        } else {
+          // Pengeluaran memotong Dompet Umum (Harian)
+          umum -= tx.amount;
+        }
+      } else if (tx.type === 'TRANSFER') {
+        // Pindah Dana Antar Dompet
+        // Kurangi wallet asal
+        if (tx.wallet_id === 'BIRU') biru -= tx.amount;
+        else if (tx.wallet_id === 'MERAH') merah -= tx.amount;
+        else if (tx.wallet_id === 'UMUM') umum -= tx.amount;
+
+        // Tambah wallet tujuan
+        if (tx.target_wallet_id === 'BIRU') biru += tx.amount;
+        else if (tx.target_wallet_id === 'MERAH') merah += tx.amount;
+        else if (tx.target_wallet_id === 'UMUM') umum += tx.amount;
       }
     });
-    return { totalIncome: income, totalExpense: expense };
-  }, [transactions]);
+
+    return {
+      saldoBiru: biru,
+      saldoMerah: merah,
+      saldoUmum: umum,
+      totalIncome: income,
+      totalExpense: expense,
+    };
+  }, [transactions, wallet.initial_balance]);
 
   const currentBalance = useMemo(() => {
-    return wallet.initial_balance + totalIncome - totalExpense;
-  }, [wallet.initial_balance, totalIncome, totalExpense]);
+    return saldoBiru + saldoMerah + saldoUmum;
+  }, [saldoBiru, saldoMerah, saldoUmum]);
 
   // Dynamic investment calculations
   const {
@@ -155,9 +199,38 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Transactions management
   const addTransaction = (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => {
     const now = new Date().toISOString();
+    // Default assignment: Pendapatan ke Dompet Biru, Pengeluaran dari Dompet Umum
+    const assignedWalletId = data.wallet_id || (data.type === 'INCOME' ? 'BIRU' : 'UMUM');
+
     const newTx: Transaction = {
       ...data,
+      wallet_id: assignedWalletId,
       id: `tx-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      created_at: now,
+      updated_at: now,
+    };
+    setTransactions((prev) => [newTx, ...prev]);
+  };
+
+  const transferFunds = (
+    from: 'BIRU' | 'MERAH' | 'UMUM',
+    to: 'BIRU' | 'MERAH' | 'UMUM',
+    amount: number,
+    note?: string
+  ) => {
+    const now = new Date().toISOString();
+    const fromLabel = from === 'BIRU' ? 'Dompet Biru' : from === 'MERAH' ? 'Dompet Merah' : 'Dompet Umum';
+    const toLabel = to === 'BIRU' ? 'Dompet Biru' : to === 'MERAH' ? 'Dompet Merah' : 'Dompet Umum';
+
+    const newTx: Transaction = {
+      id: `tx-trf-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      wallet_id: from,
+      target_wallet_id: to,
+      category_id: 'cat-transfer',
+      type: 'TRANSFER',
+      amount,
+      date: now,
+      note: note || `Pindah Dana: ${fromLabel} ➔ ${toLabel}`,
       created_at: now,
       updated_at: now,
     };
@@ -297,6 +370,9 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         settings,
         categoriesMap,
         currentBalance,
+        saldoBiru,
+        saldoMerah,
+        saldoUmum,
         totalIncome,
         totalExpense,
         totalInvested,
@@ -309,6 +385,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         addTransaction,
         updateTransaction,
         deleteTransaction,
+        transferFunds,
         addCategory,
         updateCategory,
         deleteCategory,

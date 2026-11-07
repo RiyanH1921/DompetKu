@@ -109,12 +109,12 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     transactions.forEach((tx) => {
       if (tx.type === 'INCOME') {
         income += tx.amount;
-        if (tx.wallet_id === 'BIRU' || !tx.wallet_id) {
-          // Pendapatan masuk langsung ke Dompet Biru (Uang Dingin)
+        if (tx.wallet_id === 'BIRU') {
           biru += tx.amount;
         } else if (tx.wallet_id === 'MERAH') {
           merah += tx.amount;
         } else {
+          // Default: Pendapatan masuk langsung ke Dompet Umum (Harian)
           umum += tx.amount;
         }
       } else if (tx.type === 'EXPENSE') {
@@ -199,8 +199,8 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Transactions management
   const addTransaction = (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => {
     const now = new Date().toISOString();
-    // Default assignment: Pendapatan ke Dompet Biru, Pengeluaran dari Dompet Umum
-    const assignedWalletId = data.wallet_id || (data.type === 'INCOME' ? 'BIRU' : 'UMUM');
+    // Default assignment: Pendapatan & Pengeluaran masuk/keluar ke Dompet Umum kecuali dispesifikasikan lain
+    const assignedWalletId = data.wallet_id || 'UMUM';
 
     const newTx: Transaction = {
       ...data,

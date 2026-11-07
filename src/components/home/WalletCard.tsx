@@ -27,8 +27,8 @@ export const WalletCard: React.FC<WalletCardProps> = ({
   const walletConfig = {
     UMUM: {
       name: 'Dompet Umum',
-      tag: '🟢 BELANJA HARIAN',
-      desc: 'Dipakai untuk transaksi & kebutuhan sehari-hari',
+      tag: '🟢 DANA UTAMA & HARIAN',
+      desc: 'Penampung pendapatan masuk & kebutuhan transaksi harian',
       balance: saldoUmum,
       bg: 'bg-[#1B3B2B]',
       border: 'border-[#244C38]',
@@ -37,8 +37,8 @@ export const WalletCard: React.FC<WalletCardProps> = ({
     },
     BIRU: {
       name: 'Dompet Biru',
-      tag: '🔵 UANG DINGIN (UTAMA)',
-      desc: 'Penampung seluruh pendapatan masuk. Simpanan aman.',
+      tag: '🔵 UANG DINGIN',
+      desc: 'Alokasi tabungan & simpanan dana dingin jangka panjang',
       balance: saldoBiru,
       bg: 'bg-[#1E3A8A]',
       border: 'border-[#2563EB]',
@@ -48,7 +48,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
     MERAH: {
       name: 'Dompet Merah',
       tag: '🔴 DANA SIAGA (READY)',
-      desc: 'Dana buffer yang disisihkan dari Dompet Biru',
+      desc: 'Dana buffer / cadangan yang selalu siap sedia',
       balance: saldoMerah,
       bg: 'bg-[#881337]',
       border: 'border-[#BE123C]',
@@ -63,6 +63,19 @@ export const WalletCard: React.FC<WalletCardProps> = ({
     <div className="w-full space-y-3">
       {/* 3-Pocket Switcher Tabs */}
       <div className="grid grid-cols-3 gap-1.5 bg-[#E9E7DC] dark:bg-[#1C221E] p-1.5 rounded-2xl">
+        <button
+          type="button"
+          onClick={() => setActiveWallet('UMUM')}
+          className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+            activeWallet === 'UMUM'
+              ? 'bg-[#1B3B2B] text-white shadow-sm'
+              : 'text-[#555A51] dark:text-[#8E948B] hover:text-[#1C201D] dark:hover:text-white'
+          }`}
+        >
+          <span className="w-2 h-2 rounded-full bg-[#8EE0B0] flex-shrink-0" />
+          <span className="truncate">D. Umum</span>
+        </button>
+
         <button
           type="button"
           onClick={() => setActiveWallet('BIRU')}
@@ -87,19 +100,6 @@ export const WalletCard: React.FC<WalletCardProps> = ({
         >
           <span className="w-2 h-2 rounded-full bg-rose-400 flex-shrink-0" />
           <span className="truncate">D. Merah</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveWallet('UMUM')}
-          className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
-            activeWallet === 'UMUM'
-              ? 'bg-[#1B3B2B] text-white shadow-sm'
-              : 'text-[#555A51] dark:text-[#8E948B] hover:text-[#1C201D] dark:hover:text-white'
-          }`}
-        >
-          <span className="w-2 h-2 rounded-full bg-[#8EE0B0] flex-shrink-0" />
-          <span className="truncate">D. Umum</span>
         </button>
       </div>
 
@@ -141,6 +141,18 @@ export const WalletCard: React.FC<WalletCardProps> = ({
           {/* Quick 3-Pocket Balance Overview Bar */}
           <div className="pt-3.5 border-t border-white/15 grid grid-cols-3 gap-2 text-center text-xs">
             <div
+              onClick={() => setActiveWallet('UMUM')}
+              className={`p-1.5 rounded-xl cursor-pointer transition-colors ${
+                activeWallet === 'UMUM' ? 'bg-white/15' : 'hover:bg-white/5'
+              }`}
+            >
+              <p className="text-[10px] text-white/70">Umum (Harian)</p>
+              <p className="font-semibold text-xs text-white truncate">
+                {formatRupiah(saldoUmum)}
+              </p>
+            </div>
+
+            <div
               onClick={() => setActiveWallet('BIRU')}
               className={`p-1.5 rounded-xl cursor-pointer transition-colors ${
                 activeWallet === 'BIRU' ? 'bg-white/15' : 'hover:bg-white/5'
@@ -161,18 +173,6 @@ export const WalletCard: React.FC<WalletCardProps> = ({
               <p className="text-[10px] text-white/70">Merah (Siaga)</p>
               <p className="font-semibold text-xs text-white truncate">
                 {formatRupiah(saldoMerah)}
-              </p>
-            </div>
-
-            <div
-              onClick={() => setActiveWallet('UMUM')}
-              className={`p-1.5 rounded-xl cursor-pointer transition-colors ${
-                activeWallet === 'UMUM' ? 'bg-white/15' : 'hover:bg-white/5'
-              }`}
-            >
-              <p className="text-[10px] text-white/70">Umum (Harian)</p>
-              <p className="font-semibold text-xs text-white truncate">
-                {formatRupiah(saldoUmum)}
               </p>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, AlertCircle, Plus } from 'lucide-react';
-import { CategoryType } from '../../types';
+import { CategoryType, WalletId } from '../../types';
 import { useWallet } from '../../context/WalletContext';
 import { formatRupiah, formatDateForInput } from '../../utils/format';
 
@@ -17,9 +17,10 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   onOpenManageCategories,
   onOpenNewCategory,
 }) => {
-  const { categories, currentBalance, saldoBiru, saldoUmum, addTransaction } = useWallet();
+  const { categories, saldoBiru, saldoMerah, saldoUmum, addTransaction } = useWallet();
 
   const [type, setType] = useState<CategoryType>(initialType);
+  const [selectedWallet, setSelectedWallet] = useState<WalletId>('UMUM');
   const [amountInput, setAmountInput] = useState<string>('');
   const [categoryId, setCategoryId] = useState<string>('');
   const [date, setDate] = useState<string>(formatDateForInput(new Date()));
@@ -27,8 +28,9 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   const [showOverbalanceWarning, setShowOverbalanceWarning] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
 
-  // Target wallet balance based on transaction type
-  const targetWalletBalance = type === 'INCOME' ? saldoBiru : saldoUmum;
+  // Target wallet balance based on selected wallet
+  const targetWalletBalance =
+    selectedWallet === 'BIRU' ? saldoBiru : selectedWallet === 'MERAH' ? saldoMerah : saldoUmum;
 
   // Filter categories by selected transaction type
   const availableCategories = useMemo(() => {
@@ -67,7 +69,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     }
   }, [targetWalletBalance, numericAmount, type]);
 
-  const isOverbalance = type === 'EXPENSE' && numericAmount > saldoUmum;
+  const isOverbalance = type === 'EXPENSE' && numericAmount > targetWalletBalance;
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/[^0-9]/g, '');
@@ -100,7 +102,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     txDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
 
     addTransaction({
-      wallet_id: type === 'INCOME' ? 'BIRU' : 'UMUM',
+      wallet_id: selectedWallet,
       category_id: categoryId,
       type,
       amount: numericAmount,
@@ -162,19 +164,61 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             </button>
           </div>
 
-          {/* 3-Pocket Target Destination Indicator */}
-          <div className="text-center -mt-2">
-            {type === 'INCOME' ? (
-              <span className="inline-flex items-center gap-1.5 text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-3 py-1 rounded-full font-medium border border-blue-200/60 dark:border-blue-800/60">
-                <span className="w-2 h-2 rounded-full bg-blue-600" />
-                <span>Masuk langsung ke <strong>Dompet Biru</strong> (Uang Dingin)</span>
+          {/* 3-Pocket Selection */}
+          <div className="bg-white/60 dark:bg-white/[0.03] p-3 rounded-2xl border border-[#E7E5D9] dark:border-white/5 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[#565A53] dark:text-[#8E948B]">
+                {type === 'INCOME' ? 'Masuk ke Dompet:' : 'Ambil dari Dompet:'}
               </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 text-xs text-[#1B3B2B] dark:text-[#8EE0B0] bg-[#EAF3ED] dark:bg-[#162D20] px-3 py-1 rounded-full font-medium border border-[#C5E1CF] dark:border-[#254C38]">
-                <span className="w-2 h-2 rounded-full bg-[#1B3B2B] dark:bg-[#8EE0B0]" />
-                <span>Memotong saldo <strong>Dompet Umum</strong> (Uang Harian)</span>
+              <span className="text-[11px] font-medium text-[#767A73] dark:text-[#8E948B]">
+                Saldo: {formatRupiah(targetWalletBalance)}
               </span>
-            )}
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSelectedWallet('UMUM')}
+                className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                  selectedWallet === 'UMUM'
+                    ? 'bg-[#1B3B2B] text-white shadow-sm ring-2 ring-[#1B3B2B]/20'
+                    : 'bg-[#F2EFE9] dark:bg-[#202722] text-[#565A53] dark:text-[#A0A69D] hover:bg-[#EAE6DE]'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span className="truncate">🟢 D. Umum</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedWallet('BIRU')}
+                className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                  selectedWallet === 'BIRU'
+                    ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-500/30'
+                    : 'bg-[#F2EFE9] dark:bg-[#202722] text-[#565A53] dark:text-[#A0A69D] hover:bg-[#EAE6DE]'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-blue-300" />
+                <span className="truncate">🔵 D. Biru</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedWallet('MERAH')}
+                className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                  selectedWallet === 'MERAH'
+                    ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-500/30'
+                    : 'bg-[#F2EFE9] dark:bg-[#202722] text-[#565A53] dark:text-[#A0A69D] hover:bg-[#EAE6DE]'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-rose-300" />
+                <span className="truncate">🔴 D. Merah</span>
+              </button>
+            </div>
+            <p className="text-[10px] text-center text-[#767A73] dark:text-[#8E948B]">
+              {selectedWallet === 'UMUM'
+                ? '🟢 Dompet Umum: untuk alur kas utama & kebutuhan harian'
+                : selectedWallet === 'BIRU'
+                ? '🔵 Dompet Biru: untuk alokasi tabungan & uang dingin'
+                : '🔴 Dompet Merah: untuk alokasi dana siaga & darurat'}
+            </p>
           </div>
 
           {/* Nominal Display & Input */}
@@ -306,7 +350,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               <div>
                 <p className="font-semibold mb-1">Peringatan: Saldo Tidak Cukup</p>
                 <p>
-                  Nominal pengeluaran ini ({formatRupiah(numericAmount)}) lebih besar dari saldo dompet saat ini ({formatRupiah(currentBalance)}). Apakah Anda tetap ingin melanjutkan pencatatan?
+                  Nominal pengeluaran ini ({formatRupiah(numericAmount)}) lebih besar dari saldo dompet saat ini ({formatRupiah(targetWalletBalance)}). Apakah Anda tetap ingin melanjutkan pencatatan?
                 </p>
                 <div className="mt-2.5 flex items-center gap-2">
                   <button

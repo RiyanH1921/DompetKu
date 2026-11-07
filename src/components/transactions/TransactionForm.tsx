@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, AlertCircle, Plus } from 'lucide-react';
-import { CategoryType } from '../../types';
+import { CategoryType, WalletId } from '../../types';
 import { useWallet } from '../../context/WalletContext';
 import { formatRupiah, formatDateForInput } from '../../utils/format';
 
@@ -17,15 +17,26 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   onOpenManageCategories,
   onOpenNewCategory,
 }) => {
-  const { categories, saldoUmum, addTransaction } = useWallet();
+  const { categories, saldoBiru, saldoMerah, saldoUmum, addTransaction } = useWallet();
 
   const [type, setType] = useState<CategoryType>(initialType);
+  const [selectedIncomeWallet, setSelectedIncomeWallet] = useState<WalletId>('UMUM');
   const [amountInput, setAmountInput] = useState<string>('');
   const [categoryId, setCategoryId] = useState<string>('');
   const [date, setDate] = useState<string>(formatDateForInput(new Date()));
   const [note, setNote] = useState<string>('');
   const [showOverbalanceWarning, setShowOverbalanceWarning] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
+
+  // Target wallet balance for income: based on selectedIncomeWallet; for expense: strictly saldoUmum
+  const targetWalletBalance =
+    type === 'INCOME'
+      ? selectedIncomeWallet === 'BIRU'
+        ? saldoBiru
+        : selectedIncomeWallet === 'MERAH'
+        ? saldoMerah
+        : saldoUmum
+      : saldoUmum;
 
   // Filter categories by selected transaction type
   const availableCategories = useMemo(() => {
@@ -56,14 +67,13 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   }, [amountInput]);
 
   // Realtime balance after transaction calculation (FR-12, FR-09)
-  // Pengeluaran & Pendapatan selalu dari/ke Dompet Umum
   const balanceAfterTransaction = useMemo(() => {
     if (type === 'INCOME') {
-      return saldoUmum + numericAmount;
+      return targetWalletBalance + numericAmount;
     } else {
       return saldoUmum - numericAmount;
     }
-  }, [saldoUmum, numericAmount, type]);
+  }, [targetWalletBalance, saldoUmum, numericAmount, type]);
 
   const isOverbalance = type === 'EXPENSE' && numericAmount > saldoUmum;
 
@@ -97,8 +107,11 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     // Inherit current hour/minute so order within the day is preserved
     txDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
 
+    // Pendapatan bisa ke Dompet Umum, Biru, atau Merah; Pengeluaran hanya dari Dompet Umum
+    const assignedWallet: WalletId = type === 'INCOME' ? selectedIncomeWallet : 'UMUM';
+
     addTransaction({
-      wallet_id: 'UMUM',
+      wallet_id: assignedWallet,
       category_id: categoryId,
       type,
       amount: numericAmount,
@@ -160,19 +173,77 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             </button>
           </div>
 
-          {/* Dompet Status Indicator (Hanya Dompet Umum) */}
-          <div className="flex items-center justify-between px-4 py-2.5 bg-white/60 dark:bg-white/[0.03] rounded-2xl border border-[#E7E5D9] dark:border-white/5 text-xs -mt-1">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#1B3B2B] dark:bg-[#8EE0B0] flex-shrink-0" />
-              <span className="text-[#565A53] dark:text-[#A0A69D] font-medium">
-                {type === 'INCOME' ? 'Masuk langsung ke:' : 'Hanya dipotong dari:'}{' '}
-                <strong className="text-[#1C201D] dark:text-[#E8F0EA]">Dompet Umum (Uang Harian)</strong>
+          {/* Dompet Selector (Untuk Pendapatan: Bebas pilih 3 Dompet; Untuk Pengeluaran: Hanya Dompet Umum) */}
+          {type === 'INCOME' ? (
+            <div className="bg-white/60 dark:bg-white/[0.03] p-3 rounded-2xl border border-[#E7E5D9] dark:border-white/5 space-y-2 -mt-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-[#565A53] dark:text-[#8E948B]">
+                  Masuk ke Dompet:
+                </span>
+                <span className="text-[11px] font-medium text-[#767A73] dark:text-[#8E948B]">
+                  Saldo: {formatRupiah(targetWalletBalance)}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedIncomeWallet('UMUM')}
+                  className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                    selectedIncomeWallet === 'UMUM'
+                      ? 'bg-[#1B3B2B] text-white shadow-sm ring-2 ring-[#1B3B2B]/20'
+                      : 'bg-[#F2EFE9] dark:bg-[#202722] text-[#565A53] dark:text-[#A0A69D] hover:bg-[#EAE6DE]'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span className="truncate">🟢 D. Umum</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIncomeWallet('BIRU')}
+                  className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                    selectedIncomeWallet === 'BIRU'
+                      ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-500/30'
+                      : 'bg-[#F2EFE9] dark:bg-[#202722] text-[#565A53] dark:text-[#A0A69D] hover:bg-[#EAE6DE]'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-blue-300" />
+                  <span className="truncate">🔵 D. Biru</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIncomeWallet('MERAH')}
+                  className={`py-2 px-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                    selectedIncomeWallet === 'MERAH'
+                      ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-500/30'
+                      : 'bg-[#F2EFE9] dark:bg-[#202722] text-[#565A53] dark:text-[#A0A69D] hover:bg-[#EAE6DE]'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-rose-300" />
+                  <span className="truncate">🔴 D. Merah</span>
+                </button>
+              </div>
+              <p className="text-[10px] text-center text-[#767A73] dark:text-[#8E948B]">
+                {selectedIncomeWallet === 'UMUM'
+                  ? '🟢 Dompet Umum: untuk uang harian & operasional'
+                  : selectedIncomeWallet === 'BIRU'
+                  ? '🔵 Dompet Biru: untuk simpanan dana dingin / tabungan'
+                  : '🔴 Dompet Merah: untuk alokasi dana siaga / darurat'}
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between px-4 py-2.5 bg-white/60 dark:bg-white/[0.03] rounded-2xl border border-[#E7E5D9] dark:border-white/5 text-xs -mt-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#1B3B2B] dark:bg-[#8EE0B0] flex-shrink-0" />
+                <span className="text-[#565A53] dark:text-[#A0A69D] font-medium">
+                  Hanya dipotong dari:{' '}
+                  <strong className="text-[#1C201D] dark:text-[#E8F0EA]">Dompet Umum (Uang Harian)</strong>
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-[#1B3B2B] dark:text-[#8EE0B0]">
+                Saldo: {formatRupiah(saldoUmum)}
               </span>
             </div>
-            <span className="text-[11px] font-bold text-[#1B3B2B] dark:text-[#8EE0B0]">
-              Saldo: {formatRupiah(saldoUmum)}
-            </span>
-          </div>
+          )}
 
           {/* Nominal Display & Input */}
           <div className="text-center py-4 bg-white/60 dark:bg-white/[0.03] rounded-3xl border border-[#E7E5D9] dark:border-white/5 p-4 shadow-sm">
